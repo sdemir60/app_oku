@@ -1,0 +1,61 @@
+body {
+    width: 500px;
+    height: 250px;
+}
+
+.pt-page-title i {
+    opacity: 0.05;
+    position: absolute;
+    font-size: 475px;
+    top: 11px;
+    left: 13px;
+    z-index: -9999;
+}
+
+.pt-page-help .pt-page-title i,
+.pt-page-info .pt-page-title i {
+    opacity: 0.02;
+    background: white;
+}
+
+.pt-page-help .link-tutorial {
+    cursor: pointer;
+}
+
+.pt-page-help .link-help {
+    margin-left: 20px;
+    cursor: help;
+}
+
+.pt-page-created-by img {
+    position: absolute;
+    left: 25px;
+    bottom: -15px;
+    width: 60px;
+    height: auto;
+}
+
+.button--sacnite.button-help,
+.button--sacnite.button-info,
+.button--sacnite.button-transaction {
+    width: 50px;
+    height: 50px;
+    margin: 10px 10px 0px 0px;
+}
+
+.button-transaction .far.fa-stars {
+    font-size: 25px;
+    margin-top: -3px;
+}
+
+#read {
+    margin-right: 10px;
+    margin-left: 0;
+    margin-top: 75px;
+}
+
+#download {
+    margin-right: 0;
+    margin-left: 10px;
+    margin-top: 75px;
+}
