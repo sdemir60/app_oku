@@ -51,6 +51,14 @@ $(document).ready(function () {
             PageTransitions.nextPage({nextPage: 0, animation: 22});
         });
 
+    $("#read")
+        .click(function (e) {
+            chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+                _gaq.push(['_trackEvent', "ReadButton", 'read clicked']);
+                chrome.tabs.sendMessage(tabs[0].id, {command: "oku", url: tabs[0].url});
+            });
+        });
+
     $("#download")
         .click(function (e) {
             chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
@@ -59,11 +67,19 @@ $(document).ready(function () {
             });
         });
 
-    $("#read")
+    $("#upload")
         .click(function (e) {
             chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                _gaq.push(['_trackEvent', "ReadButton", 'read clicked']);
-                chrome.tabs.sendMessage(tabs[0].id, {command: "oku", url: tabs[0].url});
+                _gaq.push(['_trackEvent', "UploadButton", 'upload clicked']);
+                chrome.tabs.sendMessage(tabs[0].id, {command: "yukle", url: tabs[0].url});
+            });
+        });
+
+    $("#check")
+        .click(function (e) {
+            chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+                _gaq.push(['_trackEvent', "CheckButton", 'check clicked']);
+                chrome.tabs.sendMessage(tabs[0].id, {command: "kontrol", url: tabs[0].url});
             });
         });
 

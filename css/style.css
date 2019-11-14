@@ -49,13 +49,51 @@ body {
 }
 
 #read {
-    margin-right: 10px;
+    margin-right: 0;
     margin-left: 0;
     margin-top: 75px;
+    width: 170px;
+    min-width: 170px;
+}
+
+#upload {
+    margin-right: 0;
+    margin-left: 10px;
+    margin-top: 75px;
+    width: 45px;
+    min-width: 45px;
+}
+
+#upload > i {
+font-size: 25px;
+}
+
+#upload span{
+    padding-right: 0;
+    padding-left: 0;
 }
 
 #download {
     margin-right: 0;
     margin-left: 10px;
     margin-top: 75px;
+    width: 45px;
+    min-width: 45px;
+}
+
+#download > i {
+    font-size: 25px;
+}
+
+#download span{
+    padding-right: 0;
+    padding-left: 0;
+}
+
+#check {
+    margin-right: 0;
+    margin-left: 10px;
+    margin-top: 75px;
+    width: 170px;
+    min-width: 170px;
 }

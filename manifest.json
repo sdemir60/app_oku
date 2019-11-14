@@ -12,6 +12,7 @@
     "https://e-okul.meb.gov.tr/IlkOgretim/OKL/*",
     "https://eokul.meb.gov.tr/OrtaOgretim/OKL/*",
     "https://e-okul.meb.gov.tr/OrtaOgretim/OKL/*",
+    "storage",
     "tabs",
     "downloads",
     "activeTab",
@@ -49,7 +50,7 @@
       },
       "description": "İndir"
     },
-    "oku": {
+    "yukle": {
       "suggested_key": {
         "default": "Ctrl+Shift+S",
         "mac": "Command+Shift+S",
@@ -57,7 +58,7 @@
         "chromeos": "Ctrl+Shift+S",
         "linux": "Ctrl+Shift+S"
       },
-      "description": "Oku"
+      "description": "Yükle"
     }
   },
   "background": {
@@ -74,14 +75,21 @@
         "https://e-okul.meb.gov.tr/OrtaOgretim/OKL/*"
       ],
       "css": [
-        "css/content.css"
+        "css/content.css",
+        "css/dimmer.css"
       ],
       "js": [
-        "js/content.js",
         "js/jquery-3.3.0.js",
         "js/jszip.js",
         "js/FileSaver.js",
-        "js/myexcel.js"
+        "js/myexcel.js",
+        "js/dimmer.js",
+        "js/extension.js",
+        "js/storage.js",
+        "js/aspx.js",
+        "js/content.js",
+        "js/speech.js",
+        "js/responsivevoice.js"
       ]
     }
   ],
@@ -92,7 +100,7 @@
   "file_browser_handlers": [
     {
       "id": "upload",
-      "default_title": "OKU",
+      "default_title": "YÜKLE",
       "file_filters": [
         "filesystem:*.xlsx"
       ]

@@ -59,19 +59,43 @@ chrome.commands.onCommand.addListener(function (command) {
                 chrome.tabs.create({url: "doc/help.pdf"});
             });
             break;
-        case "indir":
-            chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                _gaq.push(['_trackEvent', "DownloadCommand", 'download command']);
-                chrome.tabs.sendMessage(tabs[0].id, {command: "indir", url: tabs[0].url});
-            });
-            break;
         case "oku":
             chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
                 _gaq.push(['_trackEvent', "ReadCommand", 'read command']);
                 chrome.tabs.sendMessage(tabs[0].id, {command: "oku", url: tabs[0].url});
             });
             break;
+        case "indir":
+            chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+                _gaq.push(['_trackEvent', "DownloadCommand", 'download command']);
+                chrome.tabs.sendMessage(tabs[0].id, {command: "indir", url: tabs[0].url});
+            });
+            break;
+        case "yukle":
+            chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+                _gaq.push(['_trackEvent', "UploadCommand", 'upload command']);
+                chrome.tabs.sendMessage(tabs[0].id, {command: "yukle", url: tabs[0].url});
+            });
+            break;
+        case "kontrol":
+            chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+                _gaq.push(['_trackEvent', "CheckCommand", 'check command']);
+                chrome.tabs.sendMessage(tabs[0].id, {command: "kontrol", url: tabs[0].url});
+            });
+            break;
     }
+
+});
+
+//endregion
+
+//region Background >> Runtime >> onMessage
+
+chrome.runtime.onMessage.addListener(function (message) {
+
+    // TODO: 20 dil var. Türkçe aralarýnda yok. O yüzden kullanýlamadý.
+    // content.js den mesaj geçiyoruz: chrome.runtime.sendMessage({toSay: "hello sinan"}, function() {});
+    // background.js de kullanýyoruz: chrome.tts.speak(message.toSay, { rate: 0.8, onEvent: function(event) {}}, function() {});
 
 });
 
