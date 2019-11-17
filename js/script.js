@@ -41,30 +41,6 @@ function addCss() {
 
 }
 
-function addBlankCss(input) {
-
-    input.css("background", "rgba(206, 0, 0, 0.1)");
-    input.css("border-color", "rgb(206, 0, 0)");
-
-    if (!input.hasClass("input-grade-blank"))
-        input.addClass("input-grade-blank");
-
-}
-
-function addFilledCss(input) {
-
-    input.css("background", "rgba(28, 150, 0, 0.1)");
-    input.css("border-color", "rgb(28, 150, 0)");
-
-    if (!input.hasClass("input-grade-filled"))
-        input.addClass("input-grade-filled");
-
-}
-
-function clearCss() {
-    $("#dgListem tbody tr input").removeClass("input-grade-blank input-grade-filled");
-}
-
 //endregion
 
 //region Script >> Create
@@ -159,7 +135,7 @@ function writeTable(sinif) {
 
     if ($("#Table24 input:checked").length > 0 && $("#dgListem input").length > 0) {
 
-        clearCss();
+        clearInputCss();
 
         setTimeout(function () {
 

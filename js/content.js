@@ -1,12 +1,3 @@
-var stepEnum = {
-    bilgilendir: 1,
-    sinifSubeSec: 2,
-    dersSec: 3,
-    notGirisAlaniSec: 4,
-    sinifiListele: 5,
-    notlariGir: 6,
-};
-
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
     if (!sender) {
@@ -15,25 +6,19 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
     if (request.command === "oku") {
 
-        storageClear()
-            .then(function () {
-                storageSet("OKU", {isContinue: true, request: request})
-                    .then(function () {
-                        read(request);
-                    })
-            });
+        read(request);
 
     } else if (request.command === "indir") {
 
-        download(request);
+        download(request, sendResponse);
 
     } else if (request.command === "yukle") {
 
-        upload()
+        upload();
 
     } else if (request.command === "kontrol") {
 
-        check()
+        check(request);
 
     }
 
@@ -43,54 +28,13 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 function read(request) {
 
-    var guvenlikKodu = {el: null};
-    var sinifSube = {el: null, opt: []};
-    var ders = {el: null, opt: []};
     var notGirisAlani = {el: null, cbx: [], idx: -1};
-    var listele = {el: null};
     var notAlani = {el: null, txt: [], inp: []};
-    var kaydet = {el: null};
-    var cikis = {el: null};
 
     if (request.url.includes("IlkOgretim")) {
 
-        guvenlikKodu.el = $("#Gv_kod1_txtGuvenlikKod");
-        sinifSube.el = $("#ddlSinifiSubesi");
-        ders.el = $("#ddlDersler");
         notGirisAlani.el = $("#tblKonservatuar");
-        listele.el = $("#btnListele");
         notAlani.el = $("#dgListem");
-        kaydet.el = $("#IOMToolbarActive1_kaydet_b img");
-        cikis.el = $("#IOMToolbarActive1_exit_b a");
-
-        sinifSube.el
-            .find("option")
-            .each(function (index, option) {
-
-                var optionText = $(option).text().split('/');
-                var optionVal = $(option).val();
-                var sinifNumara = optionText[0].substring(0, optionText[0].indexOf('.')).trim();
-                var sinifHarf = optionText[1].trim().substring(0, 1).trim();
-
-                sinifSube.opt.push(
-                    {
-                        optText: (sinifNumara + sinifHarf).turkishToUpper(),
-                        optValue: optionVal
-                    }
-                );
-
-            });
-
-        ders.el
-            .find("option")
-            .each(function (index, option) {
-                ders.opt.push(
-                    {
-                        optText: $(option).text().trim().turkishToUpper(),
-                        optValue: $(option).val()
-                    }
-                );
-            });
 
         notGirisAlani.el
             .find("input")
@@ -115,304 +59,60 @@ function read(request) {
                     }
                 );
 
-            });
-
-        storageGet("noteInputField")
-            .then(function (noteInputField) {
-
-                if (noteInputField >= 0) {
-
-                    notAlani.el
-                        .find("tbody tr td:first-child")
-                        .each(function (index, td) {
-                            if (index > 0)
-                                notAlani.txt.push(td.innerText);
-                        });
-
-                    notAlani.el
-                        .find("tbody tr td:nth-child(" + (noteInputField + 3) + ") input")
-                        .each(function (index, input) {
-                            notAlani.inp.push(input);
-                        });
-
-                }
+                notGirisAlani.idx = notGirisAlani.idx < 0 && $(checkbox).is(':checked') ? index + 3 : notGirisAlani.idx;
 
             });
+
+        if (notGirisAlani.cbx.length > 0) {
+
+            if (notGirisAlani.idx > 0) {
+
+                notAlani.el
+                    .find("tbody tr td:first-child")
+                    .each(function (index, td) {
+                        if (index > 0)
+                            notAlani.txt.push(td.innerText);
+                    });
+
+                notAlani.el
+                    .find("tbody tr td:nth-child(" + (notGirisAlani.idx) + ") input")
+                    .each(function (index, input) {
+                        notAlani.inp.push(input);
+                    });
+
+            }
+        }
 
     } else if (request.url.includes("OrtaOgretim")) {
     }
-
-    bilgilendir()
-        .then(function () {
-
-            sinifSubeSec("Sınıf ve şube.")
-                .then(function () {
-
-                    dersSec("Ders.")
-                        .then(function () {
-
-                            notGirisAlaniSec("Not giriş alanı.")
-                                .then(function () {
-
-                                    sinifiListele()
-                                        .then(function () {
-
-                                            notlariGir(0)
-                                                .then(function () {
-
-                                                });
-
-                                        });
-
-                                });
-
-                        });
-
-                });
-
-        });
 
     function bilgilendir() {
 
         var resolve, reject;
 
-        storageGet("step")
-            .then(function (step) {
+        if (notGirisAlani.idx <= 0) {
 
-                if (!step) {
-                    textToSpeech("Öncelikle sınıf, şube, ders ve not giriş alanı bilgilerini isteyeceğim. Daha sonra ben öğrencinin okul numarasını okuyacağım sen notunu. Eğer okuduğumu anlamazsan 'tekrar' diye bana seslenebilirsin.", {rate: 1.1})
+            textToSpeech(
+                "Not giriş alanı açık değil.",
+                {
+                    call: doNotUnderstand,
+                    rate: 1.1
+                })
+                .then(function () {
+                    textToSpeech("Lütfen giriş yapmak istediğiniz alanı seçerek sınıfı listeleyiniz.", {rate: 1.1})
                         .then(function () {
-                            storageSet("step", stepEnum.bilgilendir)
-                                .then(function () {
-                                    resolve();
-                                });
+                            reject();
                         });
-                } else {
-                    setTimeout(resolve);
-                }
+                });
 
-            });
+        } else {
 
-        return new Promise(function (resolveFunc, rejectFunc) {
-            resolve = resolveFunc;
-            reject = rejectFunc;
-        });
-    }
-
-    function sinifSubeSec(text) {
-
-        var resolve, reject;
-
-        // TODO: resolve leri kontrol et. Postback olduğu için gerek kalmadı gibi local storage dan kaldığımız yeri yöneteceğiz.
-        // TODO: her işlemde anahtar kelime kontrolü. sınıf seçemedi ise devam et derse atlasın veya geç desin. sınıf kombosu heryerde farklı olabilir.
-
-        //TODO: ortak kontrol metodu yaz. adımları kontrol etsin. liste varsa ilk adımları atlasın notları okumaya başlasın.
-
-        storageGet("step")
-            .then(function (step) {
-                if (step < stepEnum.sinifSubeSec) {
-
-                    textToSpeech(text, {rate: 1})
-                        .then(function () {
-
-                            speechToText()
-                                .then(
-                                    function (text) {
-
-                                        var sinifNumara, sinifHarf, sinifHarfNumara;
-
-                                        if (text && text.length >= 2) {
-                                            sinifHarf = text.substring(text.length - 1);
-                                            sinifNumara = text.replace(sinifHarf, '');
-                                        } else if (text && text.length === 1) {
-                                            sinifHarf = "";
-                                            sinifNumara = text;
-                                        }
-
-                                        sinifHarfNumara = (sinifNumara + sinifHarf).trim().turkishToUpper();
-
-                                        if (sinifHarfNumara) {
-
-                                            sinifSube.opt.forEach(function (option, index) {
-
-                                                if (sinifHarfNumara === option.optText) {
-                                                    sinifSube.el.val(option.optValue);
-                                                    storageSet("step", stepEnum.sinifSubeSec)
-                                                        .then(function () {
-                                                            __doPostBack('ddlSinifiSubesi', '');
-                                                            resolve();
-                                                        });
-                                                }
-
-                                            })
-
-                                        }
-
-                                        sinifSubeSec("Bulamadım. Yanlışmı anladım acaba. Örneğin 5A, 7B şeklinde tekrar söylermisin?")
-
-                                    },
-                                    function () {
-
-                                        sinifSubeSec("Anlamadım. Tekrar söylermisin?")
-
-                                    }
-                                )
-
-                        });
-
-                } else {
-                    setTimeout(resolve);
-                }
-            });
-
-        return new Promise(function (resolveFunc, rejectFunc) {
-            resolve = resolveFunc;
-            reject = rejectFunc;
-        });
-    }
-
-    function dersSec(text) {
-
-        var resolve, reject;
-
-        // TODO: resolve leri kontrol et. Postback olduğu için gerek kalmadı gibi local storage dan kaldığımız yeri yöneteceğiz.
-        // TODO: her işlemde anahtar kelime kontrolü. sınıf seçemedi ise devam et derse atlasın veya geç desin. sınıf kombosu heryerde farklı olabilir.
-
-        storageGet("step")
-            .then(function (step) {
-                if (step < stepEnum.dersSec) {
-
-                    textToSpeech(text, {rate: 1})
-                        .then(function () {
-
-                            speechToText()
-                                .then(
-                                    function (text) {
-
-                                        if (text && text.length > 0) {
-
-                                            ders.opt.forEach(function (option, index) {
-
-                                                if (option.optText.includes(text.turkishToUpper())) {
-                                                    ders.el.val(option.optValue);
-                                                    storageSet("step", stepEnum.dersSec)
-                                                        .then(function () {
-                                                            resolve();
-                                                        });
-                                                }
-
-                                            })
-
-                                        }
-
-                                        dersSec("Bulamadım. Yanlışmı anladım acaba. Örneğin Kur'ân-ı Kerim, Arapça şeklinde tekrar söylermisin?")
-
-                                    },
-                                    function () {
-
-                                        dersSec("Anlamadım. Tekrar söylermisin?")
-
-                                    }
-                                )
-
-                        });
-
-                } else {
-                    setTimeout(resolve);
-                }
-            });
-
-        return new Promise(function (resolveFunc, rejectFunc) {
-            resolve = resolveFunc;
-            reject = rejectFunc;
-        });
-    }
-
-    function notGirisAlaniSec(text) {
-
-        var resolve, reject;
-
-        // TODO: resolve leri kontrol et. Postback olduğu için gerek kalmadı gibi local storage dan kaldığımız yeri yöneteceğiz.
-        // TODO: her işlemde anahtar kelime kontrolü. sınıf seçemedi ise devam et derse atlasın veya geç desin. sınıf kombosu heryerde farklı olabilir.
-
-        storageGet("step")
-            .then(function (step) {
-                if (step < stepEnum.notGirisAlaniSec) {
-
-                    textToSpeech(text, {rate: 1})
-                        .then(function () {
-
-                            speechToText()
-                                .then(
-                                    function (text) {
-
-                                        if (text && text.length > 0) {
-
-                                            notGirisAlani.cbx.forEach(function (checkbox, index) {
-
-                                                if (checkbox.txt.includes(text.turkishToUpper())) {
-
-                                                    checkbox.el.checked = true;
-                                                    notGirisAlani.idx = checkbox.idx;
-
-                                                    storageSet("noteInputField", checkbox.idx)
-                                                        .then(function () {
-
-                                                            storageSet("step", stepEnum.notGirisAlaniSec)
-                                                                .then(function () {
-                                                                    resolve();
-                                                                });
-
-                                                        });
-
-                                                }
-
-                                            })
-
-                                        }
-
-                                        notGirisAlaniSec("Bulamadım. Yanlışmı anladım acaba. Örneğin 1. sınav, 2. proje, 3.etkinlik şeklinde tekrar söylermisin?")
-
-                                    },
-                                    function () {
-
-                                        notGirisAlaniSec("Anlamadım. Tekrar söylermisin?")
-
-                                    }
-                                )
-
-                        });
-
-                } else {
-                    setTimeout(resolve);
-                }
-            });
-
-        return new Promise(function (resolveFunc, rejectFunc) {
-            resolve = resolveFunc;
-            reject = rejectFunc;
-        });
-    }
-
-    function sinifiListele() {
-
-        var resolve, reject;
-
-        storageGet("step")
-            .then(function (step) {
-
-                if (step < stepEnum.sinifiListele) {
-
-                    storageSet("step", stepEnum.sinifiListele)
-                        .then(function () {
-                            listele.el.click();
-                        });
-
-                } else {
+            textToSpeech("Ben öğrencinin okul numarasını okuyacağım sen notunu. Giriş yapmayacağın öğrenci için bana 'geç' diye seslenebilirsin.", {rate: 1.1})
+                .then(function () {
                     resolve();
-                }
+                });
 
-            });
+        }
 
         return new Promise(function (resolveFunc, rejectFunc) {
             resolve = resolveFunc;
@@ -422,63 +122,595 @@ function read(request) {
 
     function notlariGir(index) {
 
-        var resolve, reject;
+        if (index === notAlani.inp.length) {
 
-        storageGet("step")
-            .then(function (step) {
-                if (step < stepEnum.notlariGir && index < notAlani.txt.length) {
+            $(notAlani.inp[index]).blur();
 
-                    textToSpeech(notAlani.txt[index], {rate: 1})
-                        .then(function () {
+            noteEntryComplete();
+            textToSpeech("Not girişi tamamlandı. Listeyi kontrol edebilir veya kaydedebilirsiniz.", {rate: 1});
 
-                            speechToText()
-                                .then(
-                                    function (text) {
+        } else if (!$(notAlani.inp[index]).is(':disabled')) {
 
-                                        if (text && text.length > 0) {
+            textToSpeech(notAlani.txt[index], {rate: 1})
+                .then(function () {
 
-                                            notAlani.inp[index].value = text;
+                    speechToText({el: $(notAlani.inp[index]), call: "focus"})
+                        .then(
+                            function (text) {
 
-                                            if (index + 1 === notAlani.inp.length) {
-                                                storageSet("step", stepEnum.notlariGir)
-                                                    .then(function () {
-                                                        resolve();
-                                                    });
-                                            }else{
-                                                notlariGir(++index)
-                                            }
+                                var not;
 
-                                        }
+                                if (text.includes("geç")) {
+                                    not = "geç";
+                                } else if (text && text.length > 0 && text.includes(' ')) {
+                                    text = text.split(' ')[1].trim();
+                                }
 
-                                        textToSpeech("Bulamadım. Yanlışmı anladım acaba. Tekrar söylermisin?", {rate: 1})
-                                            .then(function () {
-                                                notlariGir(index);
-                                            });
+                                if (text && 0 < text.length && text.length < 4 && !not) {
 
-                                    },
-                                    function () {
-
-                                        textToSpeech("Anlamadım. Tekrar söylermisin?", {rate: 1})
-                                            .then(function () {
-                                                notlariGir(index);
-                                            });
-
+                                    switch (text) {
+                                        case "sıfır":
+                                            text = "0";
+                                            break;
+                                        case "bir":
+                                            text = "1";
+                                            break;
+                                        case "yüz":
+                                            text = "100";
+                                            break;
                                     }
-                                )
 
-                        });
+                                    not = !isNaN(parseInt(text)) ? parseInt(text) : -1;
+                                }
 
-                }
-            });
 
-        return new Promise(function (resolveFunc, rejectFunc) {
-            resolve = resolveFunc;
-            reject = rejectFunc;
-        });
+                                if (not === "geç") {
+
+                                    notlariGir(++index);
+                                    addBlankCss($(notAlani.inp[index - 1]));
+
+                                } else if (0 <= not && not <= 100) {
+
+                                    notAlani.inp[index].value = not;
+                                    notlariGir(++index);
+                                    addFilledCss($(notAlani.inp[index - 1]));
+
+                                } else {
+
+                                    $(notAlani.inp[index]).blur();
+
+                                    textToSpeech(
+                                        "Yanlışmı anladım acaba. Tekrar söylermisin?",
+                                        {
+                                            call: doNotUnderstand,
+                                            rate: 1
+                                        })
+                                        .then(function () {
+                                            notlariGir(index);
+                                        });
+
+                                }
+
+                            },
+                            function () {
+
+                                $(notAlani.inp[index]).blur();
+
+                                textToSpeech(
+                                    "Anlamadım. Tekrar söylermisin?",
+                                    {
+                                        call: doNotUnderstand,
+                                        rate: 1
+                                    })
+                                    .then(function () {
+                                        notlariGir(index);
+                                    });
+
+                            }
+                        );
+
+                });
+
+        } else {
+
+            $(notAlani.inp[index]).blur();
+
+            textToSpeech(
+                "Alan kapalı. " + notAlani.txt[index] + " numaralı öğrenciyi geçiyorum.",
+                {
+                    call: doNotUnderstand,
+                    rate: 1
+                })
+                .then(function () {
+                    notlariGir(++index);
+                });
+
+        }
     }
+
+    bilgilendir()
+        .then(function () {
+            notlariGir(0);
+        });
+
+    //region İlk Çalışma
+
+    // TODO: Üzerinde çalışılırsa aktif edilebilir.
+    // TODO: Sınıf, şube ve ders seç, listele işlemlerini içerir.
+
+    // En tepede tanımlıydı.
+    // var stepEnum = {
+    //     bilgilendir: 1,
+    //     sinifSubeSec: 2,
+    //     dersSec: 3,
+    //     notGirisAlaniSec: 4,
+    //     sinifiListele: 5,
+    //     notlariGir: 6,
+    // };
+
+    // En altta tanımlıydı. Sayfa postback olduğunda kaldığı yerden devam etmesi için
+    // (function checkContinue() {
+    //
+    //     storageGet("OKU")
+    //         .then(function (oku) {
+    //
+    //             if (oku && oku.isContinue) {
+    //                 read(oku.request);
+    //             }
+    //
+    //         });
+    //
+    // })();
+
+    // onMessage da tanımlıydı
+    // storageClear()
+    //     .then(function () {
+    //         storageSet("OKU", {isContinue: true, request: request})
+    //             .then(function () {
+    //                 read(request);
+    //             })
+    //     });
+
+    // var guvenlikKodu = {el: null};
+    // var sinifSube = {el: null, opt: []};
+    // var ders = {el: null, opt: []};
+    // var notGirisAlani = {el: null, cbx: [], idx: -1};
+    // var listele = {el: null};
+    // var notAlani = {el: null, txt: [], inp: []};
+    // var kaydet = {el: null};
+    // var cikis = {el: null};
+    //
+    // if (request.url.includes("IlkOgretim")) {
+    //
+    //     guvenlikKodu.el = $("#Gv_kod1_txtGuvenlikKod");
+    //     sinifSube.el = $("#ddlSinifiSubesi");
+    //     ders.el = $("#ddlDersler");
+    //     notGirisAlani.el = $("#tblKonservatuar");
+    //     listele.el = $("#btnListele");
+    //     notAlani.el = $("#dgListem");
+    //     kaydet.el = $("#IOMToolbarActive1_kaydet_b img");
+    //     cikis.el = $("#IOMToolbarActive1_exit_b a");
+    //
+    //     sinifSube.el
+    //         .find("option")
+    //         .each(function (index, option) {
+    //
+    //             var optionText = $(option).text().split('/');
+    //             var optionVal = $(option).val();
+    //             var sinifNumara = optionText[0].substring(0, optionText[0].indexOf('.')).trim();
+    //             var sinifHarf = optionText[1].trim().substring(0, 1).trim();
+    //
+    //             sinifSube.opt.push(
+    //                 {
+    //                     optText: (sinifNumara + sinifHarf).turkishToUpper(),
+    //                     optValue: optionVal
+    //                 }
+    //             );
+    //
+    //         });
+    //
+    //     ders.el
+    //         .find("option")
+    //         .each(function (index, option) {
+    //             ders.opt.push(
+    //                 {
+    //                     optText: $(option).text().trim().turkishToUpper(),
+    //                     optValue: $(option).val()
+    //                 }
+    //             );
+    //         });
+    //
+    //     notGirisAlani.el
+    //         .find("input")
+    //         .each(function (index, checkbox) {
+    //
+    //             var cbxId = checkbox.id;
+    //             var cbxText = "";
+    //
+    //             if (cbxId.includes("chkS")) {
+    //                 cbxText = cbxId.replace("chkS", "") + ". Sınav"
+    //             } else if (cbxId.includes("chkPRJ")) {
+    //                 cbxText = cbxId.replace("chkPRJ", "") + ". Proje"
+    //             } else if (cbxId.includes("chkPRF")) {
+    //                 cbxText = cbxId.replace("chkPRF", "") + ". Etkinlik"
+    //             }
+    //
+    //             notGirisAlani.cbx.push(
+    //                 {
+    //                     el: checkbox,
+    //                     txt: cbxText.turkishToUpper(),
+    //                     idx: index
+    //                 }
+    //             );
+    //
+    //         });
+    //
+    //     storageGet("noteInputField")
+    //         .then(function (noteInputField) {
+    //
+    //             if (noteInputField >= 0) {
+    //
+    //                 notAlani.el
+    //                     .find("tbody tr td:first-child")
+    //                     .each(function (index, td) {
+    //                         if (index > 0)
+    //                             notAlani.txt.push(td.innerText);
+    //                     });
+    //
+    //                 notAlani.el
+    //                     .find("tbody tr td:nth-child(" + (noteInputField + 3) + ") input")
+    //                     .each(function (index, input) {
+    //                         notAlani.inp.push(input);
+    //                     });
+    //
+    //             }
+    //
+    //         });
+    //
+    // } else if (request.url.includes("OrtaOgretim")) {
+    // }
+    //
+    // bilgilendir()
+    //     .then(function () {
+    //
+    //         sinifSubeSec("Sınıf ve şube.")
+    //             .then(function () {
+    //
+    //                 dersSec("Ders.")
+    //                     .then(function () {
+    //
+    //                         notGirisAlaniSec("Not giriş alanı.")
+    //                             .then(function () {
+    //
+    //                                 sinifiListele()
+    //                                     .then(function () {
+    //
+    //                                         notlariGir(0)
+    //                                             .then(function () {
+    //
+    //                                             });
+    //
+    //                                     });
+    //
+    //                             });
+    //
+    //                     });
+    //
+    //             });
+    //
+    //     });
+    //
+    // function bilgilendir() {
+    //
+    //     var resolve, reject;
+    //
+    //     storageGet("step")
+    //         .then(function (step) {
+    //
+    //             if (!step) {
+    //                 textToSpeech("Öncelikle sınıf, şube, ders ve not giriş alanı bilgilerini isteyeceğim. Daha sonra ben öğrencinin okul numarasını okuyacağım sen notunu. Eğer okuduğumu anlamazsan 'tekrar' diye bana seslenebilirsin.", {rate: 1.1})
+    //                     .then(function () {
+    //                         storageSet("step", stepEnum.bilgilendir)
+    //                             .then(function () {
+    //                                 resolve();
+    //                             });
+    //                     });
+    //             } else {
+    //                 setTimeout(resolve);
+    //             }
+    //
+    //         });
+    //
+    //     return new Promise(function (resolveFunc, rejectFunc) {
+    //         resolve = resolveFunc;
+    //         reject = rejectFunc;
+    //     });
+    // }
+    //
+    // function sinifSubeSec(text) {
+    //
+    //     var resolve, reject;
+    //
+    //     // TODO: resolve leri kontrol et. Postback olduğu için gerek kalmadı gibi local storage dan kaldığımız yeri yöneteceğiz.
+    //     // TODO: her işlemde anahtar kelime kontrolü. sınıf seçemedi ise devam et derse atlasın veya geç desin. sınıf kombosu heryerde farklı olabilir.
+    //
+    //     //TODO: ortak kontrol metodu yaz. adımları kontrol etsin. liste varsa ilk adımları atlasın notları okumaya başlasın.
+    //
+    //     storageGet("step")
+    //         .then(function (step) {
+    //             if (step < stepEnum.sinifSubeSec) {
+    //
+    //                 textToSpeech(text, {rate: 1})
+    //                     .then(function () {
+    //
+    //                         speechToText()
+    //                             .then(
+    //                                 function (text) {
+    //
+    //                                     var sinifNumara, sinifHarf, sinifHarfNumara;
+    //
+    //                                     if (text && text.length >= 2) {
+    //                                         sinifHarf = text.substring(text.length - 1);
+    //                                         sinifNumara = text.replace(sinifHarf, '');
+    //                                     } else if (text && text.length === 1) {
+    //                                         sinifHarf = "";
+    //                                         sinifNumara = text;
+    //                                     }
+    //
+    //                                     sinifHarfNumara = (sinifNumara + sinifHarf).trim().turkishToUpper();
+    //
+    //                                     if (sinifHarfNumara) {
+    //
+    //                                         sinifSube.opt.forEach(function (option, index) {
+    //
+    //                                             if (sinifHarfNumara === option.optText) {
+    //                                                 sinifSube.el.val(option.optValue);
+    //                                                 storageSet("step", stepEnum.sinifSubeSec)
+    //                                                     .then(function () {
+    //                                                         __doPostBack('ddlSinifiSubesi', '');
+    //                                                         resolve();
+    //                                                     });
+    //                                             }
+    //
+    //                                         })
+    //
+    //                                     }
+    //
+    //                                     sinifSubeSec("Bulamadım. Yanlışmı anladım acaba. Örneğin 5A, 7B şeklinde tekrar söylermisin?")
+    //
+    //                                 },
+    //                                 function () {
+    //
+    //                                     sinifSubeSec("Anlamadım. Tekrar söylermisin?")
+    //
+    //                                 }
+    //                             )
+    //
+    //                     });
+    //
+    //             } else {
+    //                 setTimeout(resolve);
+    //             }
+    //         });
+    //
+    //     return new Promise(function (resolveFunc, rejectFunc) {
+    //         resolve = resolveFunc;
+    //         reject = rejectFunc;
+    //     });
+    // }
+    //
+    // function dersSec(text) {
+    //
+    //     var resolve, reject;
+    //
+    //     // TODO: resolve leri kontrol et. Postback olduğu için gerek kalmadı gibi local storage dan kaldığımız yeri yöneteceğiz.
+    //     // TODO: her işlemde anahtar kelime kontrolü. sınıf seçemedi ise devam et derse atlasın veya geç desin. sınıf kombosu heryerde farklı olabilir.
+    //
+    //     storageGet("step")
+    //         .then(function (step) {
+    //             if (step < stepEnum.dersSec) {
+    //
+    //                 textToSpeech(text, {rate: 1})
+    //                     .then(function () {
+    //
+    //                         speechToText()
+    //                             .then(
+    //                                 function (text) {
+    //
+    //                                     if (text && text.length > 0) {
+    //
+    //                                         ders.opt.forEach(function (option, index) {
+    //
+    //                                             if (option.optText.includes(text.turkishToUpper())) {
+    //                                                 ders.el.val(option.optValue);
+    //                                                 storageSet("step", stepEnum.dersSec)
+    //                                                     .then(function () {
+    //                                                         resolve();
+    //                                                     });
+    //                                             }
+    //
+    //                                         })
+    //
+    //                                     }
+    //
+    //                                     dersSec("Bulamadım. Yanlışmı anladım acaba. Örneğin Kur'ân-ı Kerim, Arapça şeklinde tekrar söylermisin?")
+    //
+    //                                 },
+    //                                 function () {
+    //
+    //                                     dersSec("Anlamadım. Tekrar söylermisin?")
+    //
+    //                                 }
+    //                             )
+    //
+    //                     });
+    //
+    //             } else {
+    //                 setTimeout(resolve);
+    //             }
+    //         });
+    //
+    //     return new Promise(function (resolveFunc, rejectFunc) {
+    //         resolve = resolveFunc;
+    //         reject = rejectFunc;
+    //     });
+    // }
+    //
+    // function notGirisAlaniSec(text) {
+    //
+    //     var resolve, reject;
+    //
+    //     // TODO: resolve leri kontrol et. Postback olduğu için gerek kalmadı gibi local storage dan kaldığımız yeri yöneteceğiz.
+    //     // TODO: her işlemde anahtar kelime kontrolü. sınıf seçemedi ise devam et derse atlasın veya geç desin. sınıf kombosu heryerde farklı olabilir.
+    //
+    //     storageGet("step")
+    //         .then(function (step) {
+    //             if (step < stepEnum.notGirisAlaniSec) {
+    //
+    //                 textToSpeech(text, {rate: 1})
+    //                     .then(function () {
+    //
+    //                         speechToText()
+    //                             .then(
+    //                                 function (text) {
+    //
+    //                                     if (text && text.length > 0) {
+    //
+    //                                         notGirisAlani.cbx.forEach(function (checkbox, index) {
+    //
+    //                                             if (checkbox.txt.includes(text.turkishToUpper())) {
+    //
+    //                                                 checkbox.el.checked = true;
+    //                                                 notGirisAlani.idx = checkbox.idx;
+    //
+    //                                                 storageSet("noteInputField", checkbox.idx)
+    //                                                     .then(function () {
+    //
+    //                                                         storageSet("step", stepEnum.notGirisAlaniSec)
+    //                                                             .then(function () {
+    //                                                                 resolve();
+    //                                                             });
+    //
+    //                                                     });
+    //
+    //                                             }
+    //
+    //                                         })
+    //
+    //                                     }
+    //
+    //                                     notGirisAlaniSec("Bulamadım. Yanlışmı anladım acaba. Örneğin 1. sınav, 2. proje, 3.etkinlik şeklinde tekrar söylermisin?")
+    //
+    //                                 },
+    //                                 function () {
+    //
+    //                                     notGirisAlaniSec("Anlamadım. Tekrar söylermisin?")
+    //
+    //                                 }
+    //                             )
+    //
+    //                     });
+    //
+    //             } else {
+    //                 setTimeout(resolve);
+    //             }
+    //         });
+    //
+    //     return new Promise(function (resolveFunc, rejectFunc) {
+    //         resolve = resolveFunc;
+    //         reject = rejectFunc;
+    //     });
+    // }
+    //
+    // function sinifiListele() {
+    //
+    //     var resolve, reject;
+    //
+    //     storageGet("step")
+    //         .then(function (step) {
+    //
+    //             if (step < stepEnum.sinifiListele) {
+    //
+    //                 storageSet("step", stepEnum.sinifiListele)
+    //                     .then(function () {
+    //                         listele.el.click();
+    //                     });
+    //
+    //             } else {
+    //                 resolve();
+    //             }
+    //
+    //         });
+    //
+    //     return new Promise(function (resolveFunc, rejectFunc) {
+    //         resolve = resolveFunc;
+    //         reject = rejectFunc;
+    //     });
+    // }
+    //
+    // function notlariGir(index) {
+    //
+    //     var resolve, reject;
+    //
+    //     storageGet("step")
+    //         .then(function (step) {
+    //             if (step < stepEnum.notlariGir && index < notAlani.txt.length) {
+    //
+    //                 textToSpeech(notAlani.txt[index], {rate: 1})
+    //                     .then(function () {
+    //
+    //                         speechToText()
+    //                             .then(
+    //                                 function (text) {
+    //
+    //                                     var not = text && 0 < text.length && text.length < 4 && !isNaN(parseInt(text)) ? parseInt(text) : -1;
+    //
+    //                                     if (0 <= not && not <= 100) {
+    //
+    //                                         notAlani.inp[index].value = text;
+    //
+    //                                         if (index + 1 === notAlani.inp.length) {
+    //                                             storageSet("step", stepEnum.notlariGir)
+    //                                                 .then(function () {
+    //                                                     resolve();
+    //                                                 });
+    //                                         } else {
+    //                                             notlariGir(++index)
+    //                                         }
+    //
+    //                                     }
+    //
+    //                                     textToSpeech("Yanlışmı anladım acaba. Tekrar söylermisin?", {rate: 1})
+    //                                         .then(function () {
+    //                                             notlariGir(index);
+    //                                         });
+    //
+    //                                 },
+    //                                 function () {
+    //
+    //                                     textToSpeech("Anlamadım. Tekrar söylermisin?", {rate: 1})
+    //                                         .then(function () {
+    //                                             notlariGir(index);
+    //                                         });
+    //
+    //                                 }
+    //                             )
+    //
+    //                     });
+    //
+    //             }
+    //         });
+    //
+    //     return new Promise(function (resolveFunc, rejectFunc) {
+    //         resolve = resolveFunc;
+    //         reject = rejectFunc;
+    //     });
+    // }
+
+    //endregion
 }
 
-function download(request) {
+function download(request, sendResponse) {
 
     //region Excel >> Variable
 
@@ -711,19 +943,145 @@ function upload() {
 
 }
 
-function check() {
+function check(request) {
 
-}
+    var notGirisAlani = {el: null, cbx: [], idx: -1};
+    var notAlani = {el: null, txt: [], inp: []};
 
-(function checkContinue() {
+    if (request.url.includes("IlkOgretim")) {
 
-    storageGet("OKU")
-        .then(function (oku) {
+        notGirisAlani.el = $("#tblKonservatuar");
+        notAlani.el = $("#dgListem");
 
-            if (oku && oku.isContinue) {
-                read(oku.request);
+        notGirisAlani.el
+            .find("input")
+            .each(function (index, checkbox) {
+
+                var cbxId = checkbox.id;
+                var cbxText = "";
+
+                if (cbxId.includes("chkS")) {
+                    cbxText = cbxId.replace("chkS", "") + ". Sınav"
+                } else if (cbxId.includes("chkPRJ")) {
+                    cbxText = cbxId.replace("chkPRJ", "") + ". Proje"
+                } else if (cbxId.includes("chkPRF")) {
+                    cbxText = cbxId.replace("chkPRF", "") + ". Etkinlik"
+                }
+
+                notGirisAlani.cbx.push(
+                    {
+                        el: checkbox,
+                        txt: cbxText.turkishToUpper(),
+                        idx: index
+                    }
+                );
+
+                notGirisAlani.idx = notGirisAlani.idx < 0 && $(checkbox).is(':checked') ? index + 3 : notGirisAlani.idx;
+
+            });
+
+        if (notGirisAlani.cbx.length > 0) {
+
+            if (notGirisAlani.idx > 0) {
+
+                notAlani.el
+                    .find("tbody tr td:first-child")
+                    .each(function (index, td) {
+                        if (index > 0)
+                            notAlani.txt.push(td.innerText);
+                    });
+
+                notAlani.el
+                    .find("tbody tr td:nth-child(" + (notGirisAlani.idx) + ") input")
+                    .each(function (index, input) {
+                        notAlani.inp.push(input);
+                    });
+
             }
+        }
 
+    } else if (request.url.includes("OrtaOgretim")) {
+    }
+
+    function bilgilendir() {
+
+        var resolve, reject;
+
+        if (notGirisAlani.idx <= 0) {
+
+            textToSpeech(
+                "Not giriş alanı açık değil.",
+                {
+                    call: doNotUnderstand,
+                    rate: 1.1
+                })
+                .then(function () {
+                    textToSpeech("Lütfen kontrol etmek istediğiniz alanı seçerek sınıfı listeleyiniz.", {rate: 1.1})
+                        .then(function () {
+                            reject();
+                        });
+                });
+
+        } else {
+
+            textToSpeech("Önce öğrencinin okul numarasını sonra notunu okuyacağım.", {rate: 1.1})
+                .then(function () {
+                    textToSpeech("Beni takip et.")
+                        .then(function () {
+                            resolve();
+                        });
+                });
+
+        }
+
+        return new Promise(function (resolveFunc, rejectFunc) {
+            resolve = resolveFunc;
+            reject = rejectFunc;
+        });
+    }
+
+    function notlariOku(index) {
+
+        if (index === notAlani.inp.length) {
+
+            noteEntryComplete();
+            textToSpeech("Bitti. Bu kadar.", {rate: 1});
+
+        } else {
+
+            startSpeech()
+                .then(function () {
+
+                    $(notAlani.inp[index]).focus();
+
+                    textToSpeech(notAlani.txt[index], {rate: 1})
+                        .then(function () {
+
+                            var not = $(notAlani.inp[index]).val().toString();
+
+                            not = not === "" ? "Boş." : not;
+
+                            textToSpeech(not, {rate: 1})
+                                .then(function () {
+
+
+                                    notlariOku(++index);
+
+                                    not === "Boş." ? addBlankCss($(notAlani.inp[index - 1])) : addFilledCss($(notAlani.inp[index - 1]));
+
+                                });
+
+                        });
+
+                });
+
+        }
+
+    }
+
+    bilgilendir()
+        .then(function () {
+            notlariOku(0);
         });
 
-})();
+}

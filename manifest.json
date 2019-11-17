@@ -87,7 +87,9 @@
         "js/extension.js",
         "js/storage.js",
         "js/aspx.js",
+        "js/animation.js",
         "js/content.js",
+        "js/sound.js",
         "js/speech.js",
         "js/responsivevoice.js"
       ]
@@ -107,6 +109,7 @@
     }
   ],
   "web_accessible_resources": [
-    "doc/*.pdf"
+    "doc/*.pdf",
+    "aud/*.mp3"
   ]
 }
