@@ -28,33 +28,41 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 function read(request) {
 
+    var guvenlikKodu = {el: null};
     var notGirisAlani = {el: null, cbx: [], idx: -1};
-    var notAlani = {el: null, txt: [], inp: []};
+    var notAlani = {el: null, dic: {}};
+    var notGirisAlaniKontrol = {el: null, cbx: [], idx: -1};
+    var notAlaniKontrol = {el: null, txt: [], inp: []};
 
     if (request.url.includes("IlkOgretim")) {
 
+        guvenlikKodu.el = $("#Gv_kod1_txtGuvenlikKod");
         notGirisAlani.el = $("#tblKonservatuar");
         notAlani.el = $("#dgListem");
+        notGirisAlaniKontrol.el = $("#tblKonservatuar");
+        notAlaniKontrol.el = $("#dgListem");
+
+    } else if (request.url.includes("OrtaOgretim")) {
+
+        guvenlikKodu.el = $("#Gv_kod1_txtGuvenlikKod");
+        notGirisAlani.el = $("#pnlKonservatuar");
+        notAlani.el = $("#dgListem");
+        notGirisAlaniKontrol.el = $("#pnlKonservatuar");
+        notAlaniKontrol.el = $("#dgListem");
+
+    }
+
+    (function init() {
+
+        clearInputCss();
 
         notGirisAlani.el
             .find("input")
             .each(function (index, checkbox) {
 
-                var cbxId = checkbox.id;
-                var cbxText = "";
-
-                if (cbxId.includes("chkS")) {
-                    cbxText = cbxId.replace("chkS", "") + ". Sınav"
-                } else if (cbxId.includes("chkPRJ")) {
-                    cbxText = cbxId.replace("chkPRJ", "") + ". Proje"
-                } else if (cbxId.includes("chkPRF")) {
-                    cbxText = cbxId.replace("chkPRF", "") + ". Etkinlik"
-                }
-
                 notGirisAlani.cbx.push(
                     {
                         el: checkbox,
-                        txt: cbxText.turkishToUpper(),
                         idx: index
                     }
                 );
@@ -70,27 +78,39 @@ function read(request) {
                 notAlani.el
                     .find("tbody tr td:first-child")
                     .each(function (index, td) {
-                        if (index > 0)
-                            notAlani.txt.push(td.innerText);
-                    });
 
-                notAlani.el
-                    .find("tbody tr td:nth-child(" + (notGirisAlani.idx) + ") input")
-                    .each(function (index, input) {
-                        notAlani.inp.push(input);
+                        var inputEl = notAlani.el.find("tbody tr:nth-child(" + (index + 1) + ") td:nth-child(" + notGirisAlani.idx + ") input");
+                        var isDisabled = inputEl.prop('disabled');
+
+                        if (isDisabled) {
+
+                            inputEl.prop('disabled', false);
+                            inputEl.prop('readonly', true);
+
+                        }
+
+                        if (index > 0) {
+                            notAlani.dic[td.innerText] = {
+                                isDis: isDisabled,
+                                el: notAlani.el.find("tbody tr:nth-child(" + (index + 1) + ") td:nth-child(" + notGirisAlani.idx + ") input")
+                            }
+                        }
+
                     });
 
             }
         }
 
-    } else if (request.url.includes("OrtaOgretim")) {
-    }
+        notGirisAlaniKontrol.cbx = notGirisAlani.cbx;
+        notGirisAlaniKontrol.idx = notGirisAlani.idx;
+
+    })();
 
     function bilgilendir() {
 
         var resolve, reject;
 
-        if (notGirisAlani.idx <= 0) {
+        if (notGirisAlani.idx <= 0 || notAlani.el.length <= 0) {
 
             textToSpeech(
                 "Not giriş alanı açık değil.",
@@ -107,9 +127,18 @@ function read(request) {
 
         } else {
 
-            textToSpeech("Ben öğrencinin okul numarasını okuyacağım sen notunu. Giriş yapmayacağın öğrenci için bana 'geç' diye seslenebilirsin.", {rate: 1.1})
+            textToSpeech("Selâmun aleyküm.")
                 .then(function () {
-                    resolve();
+                    textToSpeech("İlk sesi duyduğunda öğrencinin okul numarasını, ikinci sesi duyduğunda notunu okumalısın. Not girişi tamamlandığında bana 'tamam' diye seslenerek işlemi bitirebilir, 'oku' diye seslenerek giriş yaptığım notları kontrol edebilirsin.", {rate: 1.1})
+                        .then(function () {
+                            textToSpeech("Ben hazırım.")
+                                .then(function () {
+                                    textToSpeech("OKU.")
+                                        .then(function () {
+                                            resolve();
+                                        });
+                                });
+                        });
                 });
 
         }
@@ -120,120 +149,334 @@ function read(request) {
         });
     }
 
-    function notlariGir(index) {
+    function notlariGir() {
 
-        if (index === notAlani.inp.length) {
+        speechToText()
+            .then(
+                function (ogrenci) {
 
-            $(notAlani.inp[index]).blur();
+                    if (ogrenci && ogrenci.includes("oku")) {
+                        ogrenci = "oku";
+                    } else if (ogrenci && ogrenci.includes("tamam")) {
+                        ogrenci = "tamam";
+                    } else {
+                        ogrenci = speechNumberNormalize(ogrenci, null);
+                    }
 
-            noteEntryComplete();
-            textToSpeech("Not girişi tamamlandı. Listeyi kontrol edebilir veya kaydedebilirsiniz.", {rate: 1});
+                    if (ogrenci === "oku") {
 
-        } else if (!$(notAlani.inp[index]).is(':disabled')) {
+                        request.notGirisAlaniKontrol = notGirisAlaniKontrol;
+                        request.notAlaniKontrol = notAlaniKontrol;
 
-            textToSpeech(notAlani.txt[index], {rate: 1})
-                .then(function () {
+                        check(request);
 
-                    speechToText({el: $(notAlani.inp[index]), call: "focus"})
-                        .then(
-                            function (text) {
+                    } else if (ogrenci === "tamam") {
 
-                                var not;
+                        focus(guvenlikKodu.el);
 
-                                if (text.includes("geç")) {
-                                    not = "geç";
-                                } else if (text && text.length > 0 && text.includes(' ')) {
-                                    text = text.split(' ')[1].trim();
-                                }
+                        noteEntryComplete();
+                        textToSpeech("Teşekkür ederim.", {rate: 1.1})
+                            .then(function () {
+                                textToSpeech("Listeyi kaydedebilirsin.", {rate: 1.1})
+                            })
 
-                                if (text && 0 < text.length && text.length < 4 && !not) {
+                    } else if (ogrenci && !notAlani.dic.hasOwnProperty(ogrenci)) {
 
-                                    switch (text) {
-                                        case "sıfır":
-                                            text = "0";
-                                            break;
-                                        case "bir":
-                                            text = "1";
-                                            break;
-                                        case "yüz":
-                                            text = "100";
-                                            break;
+                        blur();
+
+                        textToSpeech(
+                            speakNumberNormalize(ogrenci.toString()) + " numaralı öğrenciyi bulamadım. Kontrol edebilir misin?",
+                            {
+                                call: doNotUnderstand,
+                                rate: 1.1
+                            })
+                            .then(function () {
+                                textToSpeech("Seni dinliyorum?")
+                                    .then(function () {
+                                        notlariGir();
+                                    });
+                            });
+
+                    } else if (ogrenci && notAlani.dic.hasOwnProperty(ogrenci) && notAlani.dic[ogrenci].isDis) {
+
+                        blur();
+
+                        textToSpeech(
+                            speakNumberNormalize(ogrenci.toString()) + " numaralı öğrenci için not alanı kapalı. Kontrol edebilir misin?",
+                            {
+                                call: doNotUnderstand,
+                                rate: 1.1
+                            })
+                            .then(function () {
+                                textToSpeech("Seni dinliyorum?")
+                                    .then(function () {
+                                        notlariGir();
+                                    });
+                            });
+
+                    } else if (ogrenci && notAlani.dic.hasOwnProperty(ogrenci)) {
+
+                        speechToText(
+                            {
+                                startFocusElement: notAlani.dic[ogrenci].el,
+                                startSpeechSound: focusInput
+                            })
+                            .then(
+                                function (text) {
+
+                                    var not = speechNumberNormalize(text, -1);
+
+                                    if (0 <= not && not <= 100) {
+
+                                        notAlani.dic[ogrenci].el[0].value = not;
+                                        notlariGir();
+                                        addFilledCss(notAlani.dic[ogrenci].el);
+
+                                        notAlaniKontrol.txt.push(ogrenci.toString());
+                                        notAlaniKontrol.inp.push(notAlani.dic[ogrenci].el);
+
+                                    } else {
+
+                                        blur();
+
+                                        textToSpeech(
+                                            "Yanlışmı anladım acaba. Öğrencinin numarasını ve notunu tekrar söylermisin?",
+                                            {
+                                                call: doNotUnderstand,
+                                                rate: 1.1
+                                            })
+                                            .then(function () {
+                                                notlariGir();
+                                            });
+
                                     }
 
-                                    not = !isNaN(parseInt(text)) ? parseInt(text) : -1;
-                                }
+                                },
+                                function () {
 
-
-                                if (not === "geç") {
-
-                                    notlariGir(++index);
-                                    addBlankCss($(notAlani.inp[index - 1]));
-
-                                } else if (0 <= not && not <= 100) {
-
-                                    notAlani.inp[index].value = not;
-                                    notlariGir(++index);
-                                    addFilledCss($(notAlani.inp[index - 1]));
-
-                                } else {
-
-                                    $(notAlani.inp[index]).blur();
+                                    blur();
 
                                     textToSpeech(
-                                        "Yanlışmı anladım acaba. Tekrar söylermisin?",
+                                        "Anlamadım. Öğrencinin numarasını ve notunu tekrar söylermisin?",
                                         {
                                             call: doNotUnderstand,
-                                            rate: 1
+                                            rate: 1.1
                                         })
                                         .then(function () {
-                                            notlariGir(index);
+                                            notlariGir();
                                         });
 
                                 }
+                            );
 
-                            },
-                            function () {
+                    } else {
 
-                                $(notAlani.inp[index]).blur();
+                        blur();
 
-                                textToSpeech(
-                                    "Anlamadım. Tekrar söylermisin?",
-                                    {
-                                        call: doNotUnderstand,
-                                        rate: 1
-                                    })
-                                    .then(function () {
-                                        notlariGir(index);
-                                    });
+                        textToSpeech(
+                            "Yanlışmı anladım acaba. Tekrar söylermisin?",
+                            {
+                                call: doNotUnderstand,
+                                rate: 1.1
+                            })
+                            .then(function () {
+                                notlariGir();
+                            });
 
-                            }
-                        );
+                    }
 
-                });
 
-        } else {
+                },
+                function () {
 
-            $(notAlani.inp[index]).blur();
+                    blur();
 
-            textToSpeech(
-                "Alan kapalı. " + notAlani.txt[index] + " numaralı öğrenciyi geçiyorum.",
-                {
-                    call: doNotUnderstand,
-                    rate: 1
-                })
-                .then(function () {
-                    notlariGir(++index);
-                });
+                    textToSpeech(
+                        "Anlamadım. Tekrar söylermisin?",
+                        {
+                            call: doNotUnderstand,
+                            rate: 1.1
+                        })
+                        .then(function () {
+                            notlariGir();
+                        });
 
-        }
+                }
+            );
+
     }
 
     bilgilendir()
         .then(function () {
-            notlariGir(0);
+            notlariGir();
         });
 
-    //region İlk Çalışma
+    function focus(input) {
+
+        if (input) {
+            input.focus();
+        }
+
+    }
+
+    function blur() {
+
+        document.activeElement.blur();
+
+    }
+
+    //region read >> sırasi ile oku
+
+    // function bilgilendir() {
+    //
+    //     var resolve, reject;
+    //
+    //     if (notGirisAlani.idx <= 0 || notAlani.el.length <= 0) {
+    //
+    //         textToSpeech(
+    //             "Not giriş alanı açık değil.",
+    //             {
+    //                 call: doNotUnderstand,
+    //                 rate: 1.1
+    //             })
+    //             .then(function () {
+    //                 textToSpeech("Lütfen giriş yapmak istediğiniz alanı seçerek sınıfı listeleyiniz.", {rate: 1.1})
+    //                     .then(function () {
+    //                         reject();
+    //                     });
+    //             });
+    //
+    //     } else {
+    //
+    //         textToSpeech("Ben öğrencinin okul numarasını okuyacağım sen notunu. Giriş yapmayacağın öğrenci için bana 'geç' diye seslenebilirsin.", {rate: 1.1})
+    //             .then(function () {
+    //                 resolve();
+    //             });
+    //
+    //     }
+    //
+    //     return new Promise(function (resolveFunc, rejectFunc) {
+    //         resolve = resolveFunc;
+    //         reject = rejectFunc;
+    //     });
+    // }
+    //
+    // function notlariGir(index) {
+    //
+    //     if (index === notAlani.inp.length) {
+    //
+    //         $(notAlani.inp[index]).blur();
+    //
+    //         noteEntryComplete();
+    //         textToSpeech("Not girişi tamamlandı. Listeyi kontrol edebilir veya kaydedebilirsiniz.", {rate: 1});
+    //
+    //     } else if (!$(notAlani.inp[index]).is(':disabled')) {
+    //
+    //         textToSpeech(notAlani.txt[index], {rate: 1})
+    //             .then(function () {
+    //
+    //                 speechToText({el: $(notAlani.inp[index]), call: "focus"})
+    //                     .then(
+    //                         function (text) {
+    //
+    //                             var not;
+    //
+    //                             if (text.includes("geç")) {
+    //                                 not = "geç";
+    //                             } else if (text && text.length > 0 && text.includes(' ')) {
+    //                                 text = text.split(' ')[1].trim();
+    //                             }
+    //
+    //                             if (text && 0 < text.length && text.length < 4 && !not) {
+    //
+    //                                 switch (text) {
+    //                                     case "sıfır":
+    //                                         text = "0";
+    //                                         break;
+    //                                     case "bir":
+    //                                         text = "1";
+    //                                         break;
+    //                                     case "yüz":
+    //                                         text = "100";
+    //                                         break;
+    //                                 }
+    //
+    //                                 not = !isNaN(parseInt(text)) ? parseInt(text) : -1;
+    //                             }
+    //
+    //
+    //                             if (not === "geç") {
+    //
+    //                                 notlariGir(++index);
+    //                                 addBlankCss($(notAlani.inp[index - 1]));
+    //
+    //                             } else if (0 <= not && not <= 100) {
+    //
+    //                                 notAlani.inp[index].value = not;
+    //                                 notlariGir(++index);
+    //                                 addFilledCss($(notAlani.inp[index - 1]));
+    //
+    //                             } else {
+    //
+    //                                 $(notAlani.inp[index]).blur();
+    //
+    //                                 textToSpeech(
+    //                                     "Yanlışmı anladım acaba. Tekrar söylermisin?",
+    //                                     {
+    //                                         call: doNotUnderstand,
+    //                                         rate: 1
+    //                                     })
+    //                                     .then(function () {
+    //                                         notlariGir(index);
+    //                                     });
+    //
+    //                             }
+    //
+    //                         },
+    //                         function () {
+    //
+    //                             $(notAlani.inp[index]).blur();
+    //
+    //                             textToSpeech(
+    //                                 "Anlamadım. Tekrar söylermisin?",
+    //                                 {
+    //                                     call: doNotUnderstand,
+    //                                     rate: 1
+    //                                 })
+    //                                 .then(function () {
+    //                                     notlariGir(index);
+    //                                 });
+    //
+    //                         }
+    //                     );
+    //
+    //             });
+    //
+    //     } else {
+    //
+    //         $(notAlani.inp[index]).blur();
+    //
+    //         textToSpeech(
+    //             "Alan kapalı. " + notAlani.txt[index] + " numaralı öğrenciyi geçiyorum.",
+    //             {
+    //                 call: doNotUnderstand,
+    //                 rate: 1
+    //             })
+    //             .then(function () {
+    //                 notlariGir(++index);
+    //             });
+    //
+    //     }
+    // }
+    //
+    // bilgilendir()
+    //     .then(function () {
+    //         notlariGir(0);
+    //     });
+
+    //endregion
+
+    //region read >> ilk çalışma
 
     // TODO: Üzerinde çalışılırsa aktif edilebilir.
     // TODO: Sınıf, şube ve ders seç, listele işlemlerini içerir.
@@ -945,69 +1188,93 @@ function upload() {
 
 function check(request) {
 
+    var fromRead = false;
+    var guvenlikKodu = {el: null};
     var notGirisAlani = {el: null, cbx: [], idx: -1};
     var notAlani = {el: null, txt: [], inp: []};
 
-    if (request.url.includes("IlkOgretim")) {
+    (function init() {
 
-        notGirisAlani.el = $("#tblKonservatuar");
-        notAlani.el = $("#dgListem");
+        clearInputCss();
+        guvenlikKodu.el = $("#Gv_kod1_txtGuvenlikKod");
 
-        notGirisAlani.el
-            .find("input")
-            .each(function (index, checkbox) {
+        if (request.notGirisAlaniKontrol) {
 
-                var cbxId = checkbox.id;
-                var cbxText = "";
+            fromRead = true;
+            notGirisAlani = request.notGirisAlaniKontrol;
+            notAlani = request.notAlaniKontrol;
 
-                if (cbxId.includes("chkS")) {
-                    cbxText = cbxId.replace("chkS", "") + ". Sınav"
-                } else if (cbxId.includes("chkPRJ")) {
-                    cbxText = cbxId.replace("chkPRJ", "") + ". Proje"
-                } else if (cbxId.includes("chkPRF")) {
-                    cbxText = cbxId.replace("chkPRF", "") + ". Etkinlik"
-                }
+        } else {
 
-                notGirisAlani.cbx.push(
-                    {
-                        el: checkbox,
-                        txt: cbxText.turkishToUpper(),
-                        idx: index
-                    }
-                );
+            fromRead = false;
 
-                notGirisAlani.idx = notGirisAlani.idx < 0 && $(checkbox).is(':checked') ? index + 3 : notGirisAlani.idx;
+            if (request.url.includes("IlkOgretim")) {
 
-            });
+                notGirisAlani.el = $("#tblKonservatuar");
+                notAlani.el = $("#dgListem");
 
-        if (notGirisAlani.cbx.length > 0) {
+            } else if (request.url.includes("OrtaOgretim")) {
 
-            if (notGirisAlani.idx > 0) {
-
-                notAlani.el
-                    .find("tbody tr td:first-child")
-                    .each(function (index, td) {
-                        if (index > 0)
-                            notAlani.txt.push(td.innerText);
-                    });
-
-                notAlani.el
-                    .find("tbody tr td:nth-child(" + (notGirisAlani.idx) + ") input")
-                    .each(function (index, input) {
-                        notAlani.inp.push(input);
-                    });
+                notGirisAlani.el = $("#pnlKonservatuar");
+                notAlani.el = $("#dgListem");
 
             }
+
+            notGirisAlani.el
+                .find("input")
+                .each(function (index, checkbox) {
+
+                    notGirisAlani.cbx.push(
+                        {
+                            el: checkbox,
+                            idx: index
+                        }
+                    );
+
+                    notGirisAlani.idx = notGirisAlani.idx < 0 && $(checkbox).is(':checked') ? index + 3 : notGirisAlani.idx;
+
+                });
+
+            if (notGirisAlani.cbx.length > 0) {
+
+                if (notGirisAlani.idx > 0) {
+
+                    notAlani.el
+                        .find("tbody tr td:first-child")
+                        .each(function (index, td) {
+                            if (index > 0)
+                                notAlani.txt.push(td.innerText);
+                        });
+
+                    notAlani.el
+                        .find("tbody tr td:nth-child(" + (notGirisAlani.idx) + ") input")
+                        .each(function (index, input) {
+
+                            var isDisabled = $(input).prop('disabled');
+
+                            if (isDisabled) {
+
+                                $(input).prop('disabled', false);
+                                $(input).prop('readonly', true);
+
+                            }
+
+                            notAlani.inp.push(input);
+
+                        });
+
+                }
+            }
+
         }
 
-    } else if (request.url.includes("OrtaOgretim")) {
-    }
+    })();
 
     function bilgilendir() {
 
         var resolve, reject;
 
-        if (notGirisAlani.idx <= 0) {
+        if (notGirisAlani.idx <= 0 || notAlani.el.length <= 0) {
 
             textToSpeech(
                 "Not giriş alanı açık değil.",
@@ -1022,13 +1289,26 @@ function check(request) {
                         });
                 });
 
-        } else {
+        } else if (fromRead) {
 
-            textToSpeech("Önce öğrencinin okul numarasını sonra notunu okuyacağım.", {rate: 1.1})
+            textToSpeech("Notları girdiğim sıraya göre önce öğrencinin okul numarasını sonra notunu okuyacağım.", {rate: 1.1})
                 .then(function () {
                     textToSpeech("Beni takip et.")
                         .then(function () {
                             resolve();
+                        });
+                });
+
+        } else {
+
+            textToSpeech("Selâmun aleyküm.")
+                .then(function () {
+                    textToSpeech("Önce öğrencinin okul numarasını sonra notunu okuyacağım.", {rate: 1.1})
+                        .then(function () {
+                            textToSpeech("Beni takip et.")
+                                .then(function () {
+                                    resolve();
+                                });
                         });
                 });
 
@@ -1044,26 +1324,27 @@ function check(request) {
 
         if (index === notAlani.inp.length) {
 
+            focus(guvenlikKodu.el);
+
             noteEntryComplete();
             textToSpeech("Bitti. Bu kadar.", {rate: 1});
 
         } else {
 
-            startSpeech()
+            focus(notAlani.inp[index]);
+
+            focusInput()
                 .then(function () {
 
-                    $(notAlani.inp[index]).focus();
-
-                    textToSpeech(notAlani.txt[index], {rate: 1})
+                    textToSpeech(speakNumberNormalize(notAlani.txt[index]), {rate: 1})
                         .then(function () {
 
                             var not = $(notAlani.inp[index]).val().toString();
 
                             not = not === "" ? "Boş." : not;
 
-                            textToSpeech(not, {rate: 1})
+                            textToSpeech(speakNumberNormalize(not), {rate: 1})
                                 .then(function () {
-
 
                                     notlariOku(++index);
 
@@ -1083,5 +1364,19 @@ function check(request) {
         .then(function () {
             notlariOku(0);
         });
+
+    function focus(input) {
+
+        if (input) {
+            input.focus();
+        }
+
+    }
+
+    function blur() {
+
+        document.activeElement.blur();
+
+    }
 
 }

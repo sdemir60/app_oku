@@ -91,47 +91,72 @@ function textToSpeech(text, options) {
     });
 }
 
-function speechToText(onStartFunc) {
+function speechToText(options) {
+
+    options = options || {};
 
     var resolve, reject;
     var finalTranscript;
+
+    var startFocusElement = options.startFocusElement || null;
+    var startBlurElement = options.startBlurElement || null;
+    var startSpeechSound = options.startSpeechSound || startSpeech;
 
     //region speechToText >> note
 
     // İhtiyaç olursa kullanılabilir.
 
+    // recognition.onstart = function (event) {
+    //     console.log("onstart")
+    // };
+    //
     // recognition.onaudiostart = function (event) {
+    //     console.log("onaudiostart")
     // };
     //
     // recognition.onsoundstart = function (event) {
+    //     console.log("onsoundstart")
     // };
     //
     // recognition.onspeechstart = function (event) {
+    //     console.log("onspeechstart")
     // };
     //
     // recognition.onspeechend = function (event) {
+    //     console.log("onspeechend")
     // };
     //
     // recognition.onsoundend = function (event) {
+    //     console.log("onsoundend")
     // };
     //
     // recognition.onaudioend = function (event) {
+    //     console.log("onaudioend")
     // };
     //
     // recognition.onnomatch = function (event) {
+    //     console.log("onnomatch")
+    // };
+    //
+    // recognition.onresult = function (event) {
+    //     console.log("onresult")
+    // };
+    //
+    // recognition.onend = function (event) {
+    //     console.log("onend")
     // };
 
     //endregion
 
     recognition.onstart = function (event) {
 
-        startSpeech()
-            .then(function () {
+        startSpeechSound();
 
-                if (onStartFunc)
-                    onStartFunc.el[onStartFunc.call]();
+        if (startBlurElement)
+            startBlurElement.blur();
 
-            })
+        if (startFocusElement)
+            startFocusElement.focus();
 
     };
 
@@ -140,17 +165,16 @@ function speechToText(onStartFunc) {
         if (event && event.results && event.results.length > 0 && event.results[0].length > 0)
             finalTranscript = event.results[0][0].transcript;
 
-        if (finalTranscript) {
-            resolve(finalTranscript);
-        } else {
-            reject()
-        }
-
     };
 
     recognition.onend = function (event) {
-        if (!finalTranscript)
-            reject()
+
+        if (finalTranscript) {
+            resolve(finalTranscript);
+        } else {
+            reject();
+        }
+
     };
 
     recognition.start();

@@ -1,7 +1,12 @@
-
 //region variable >> startSpeech
 
 startSpeechAudioSrc = chrome.runtime.getURL("aud/startSpeech.mp3");
+
+//endregion
+
+//region variable >> focusInput
+
+focusInputAudioSrc = chrome.runtime.getURL("aud/focusInput.mp3");
 
 //endregion
 
@@ -27,7 +32,28 @@ function startSpeech() {
     audio.oncanplay = function () {
         setTimeout(function () {
             resolve();
-        }, 250)
+        })
+    };
+
+    audio.play();
+
+    return new Promise(function (resolveFunc, rejectFunc) {
+        resolve = resolveFunc;
+        reject = rejectFunc;
+    });
+}
+
+function focusInput() {
+
+    var resolve, reject;
+    var audio = new Audio();
+
+    audio.volume = 1;
+    audio.src = focusInputAudioSrc;
+    audio.oncanplay = function () {
+        setTimeout(function () {
+            resolve();
+        })
     };
 
     audio.play();

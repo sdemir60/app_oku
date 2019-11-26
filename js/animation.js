@@ -27,5 +27,11 @@ function removeInputCss(input) {
 }
 
 function clearInputCss() {
-    $("#dgListem tbody tr input").removeClass("input-grade-blank input-grade-filled");
+
+    var inputs = $("#dgListem tbody tr input");
+
+    inputs.css("background", "");
+    inputs.css("border-color", "");
+    inputs.removeClass("input-grade-blank input-grade-filled");
+
 }
