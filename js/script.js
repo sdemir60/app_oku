@@ -58,6 +58,87 @@ function createInput() {
 
 }
 
+function createShareButton() {
+
+    var table = document.getElementById("Table5");
+    var container = document.createElement("div");
+
+    if (table) {
+
+        var btnFacebook = document.createElement("a");
+        var btnFacebookI = document.createElement("i");
+        var btnFacebookSpan = document.createElement("span");
+        var btnTwitter = document.createElement("a");
+        var btnTwitterI = document.createElement("i");
+        var btnTwitterSpan = document.createElement("span");
+        var btnYoutube = document.createElement("a");
+        var btnYoutubeI = document.createElement("i");
+        var btnYoutubeSpan = document.createElement("span");
+        var btnLinkedin = document.createElement("a");
+        var btnLinkedinI = document.createElement("i");
+        var btnLinkedinSpan = document.createElement("span");
+        var btnGoogle = document.createElement("a");
+        var btnGoogleI = document.createElement("i");
+        var btnGoogleSpan = document.createElement("span");
+
+        table.parentElement.setAttribute('style', "text-align:center");
+        container.setAttribute('class', "social-share-container");
+        table.parentElement.insertBefore(container, table.nextSibling);
+
+        btnFacebook.setAttribute('id', "SocialShareBtnFacebook");
+        btnFacebook.setAttribute('href', "https://www.facebook.com/sharer/sharer.php?u=https://www.facebook.com/sindem60/posts/10221160274499930");
+        btnFacebook.setAttribute('target', "_blank");
+        btnFacebook.setAttribute('class', "social-share-btn social-share-btn-f");
+        btnFacebookI.setAttribute('class', "fab fa-facebook");
+        btnFacebookSpan.innerHTML = "Facebook";
+        btnFacebook.appendChild(btnFacebookI);
+        btnFacebook.appendChild(btnFacebookSpan);
+
+        btnTwitter.setAttribute('id', "SocialShareBtnTwitter");
+        btnTwitter.setAttribute('href', "https://twitter.com/intent/retweet?tweet_id=1214257573081341953");
+        btnTwitter.setAttribute('target', "_blank");
+        btnTwitter.setAttribute('class', "social-share-btn social-share-btn-t");
+        btnTwitterI.setAttribute('class', "fab fa-twitter");
+        btnTwitterSpan.innerHTML = "Twitter";
+        btnTwitter.appendChild(btnTwitterI);
+        btnTwitter.appendChild(btnTwitterSpan);
+
+        btnYoutube.setAttribute('id', "SocialShareBtnYoutube");
+        btnYoutube.setAttribute('href', "https://www.youtube.com/watch?v=r_Ex-PKJ-P4&feature=emb_title");
+        btnYoutube.setAttribute('target', "_blank");
+        btnYoutube.setAttribute('class', "social-share-btn social-share-btn-y");
+        btnYoutubeI.setAttribute('class', "fab fa-youtube");
+        btnYoutubeSpan.innerHTML = "Youtube";
+        btnYoutube.appendChild(btnYoutubeI);
+        btnYoutube.appendChild(btnYoutubeSpan);
+
+        btnLinkedin.setAttribute('id', "SocialShareBtnLinkedin");
+        btnLinkedin.setAttribute('href', "https://www.linkedin.com/shareArticle?url=https://www.linkedin.com/posts/sdemir60_oku-activity-6620024154508808192-LKGj");
+        btnLinkedin.setAttribute('target', "_blank");
+        btnLinkedin.setAttribute('class', "social-share-btn social-share-btn-l");
+        btnLinkedinI.setAttribute('class', "fab fa-linkedin");
+        btnLinkedinSpan.innerHTML = "Linkedin";
+        btnLinkedin.appendChild(btnLinkedinI);
+        btnLinkedin.appendChild(btnLinkedinSpan);
+
+        btnGoogle.setAttribute('id', "SocialShareBtnGoogle");
+        btnGoogle.setAttribute('href', "https://chrome.google.com/webstore/detail/oku/dkbhkkfomkgjdhfoockmplhmlhkckhoh?hl=tr");
+        btnGoogle.setAttribute('target', "_blank");
+        btnGoogle.setAttribute('class', "social-share-btn social-share-btn-g");
+        btnGoogleI.setAttribute('class', "fab fa-google");
+        btnGoogleSpan.innerHTML = "Market";
+        btnGoogle.appendChild(btnGoogleI);
+        btnGoogle.appendChild(btnGoogleSpan);
+
+        container.appendChild(btnGoogle);
+        container.appendChild(btnYoutube);
+        container.appendChild(btnTwitter);
+        container.appendChild(btnFacebook);
+        container.appendChild(btnLinkedin);
+
+    }
+}
+
 //endregion
 
 //region Script >> Read
@@ -225,6 +306,6 @@ function writeTable(sinif) {
 
 addCss();
 createInput();
+createShareButton();
 
 //endregion
-

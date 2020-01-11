@@ -2,7 +2,7 @@
   "name": "OKU",
   "short_name": "OKU",
   "description": "e-Okul Sesli Ders Notu Girişi",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "manifest_version": 2,
   "icons": {
     "128": "img/OKU128.png"
@@ -10,8 +10,10 @@
   "permissions": [
     "https://eokul.meb.gov.tr/IlkOgretim/OKL/*",
     "https://e-okul.meb.gov.tr/IlkOgretim/OKL/*",
+	"https://eokulyd.meb.gov.tr/IlkOgretim/OKL/*",
     "https://eokul.meb.gov.tr/OrtaOgretim/OKL/*",
     "https://e-okul.meb.gov.tr/OrtaOgretim/OKL/*",
+	"https://eokulyd.meb.gov.tr/OrtaOgretim/OKL/*",
     "storage",
     "tabs",
     "downloads",
@@ -71,11 +73,15 @@
       "matches": [
         "https://eokul.meb.gov.tr/IlkOgretim/OKL/*",
         "https://e-okul.meb.gov.tr/IlkOgretim/OKL/*",
+        "https://eokulyd.meb.gov.tr/IlkOgretim/OKL/*",
         "https://eokul.meb.gov.tr/OrtaOgretim/OKL/*",
-        "https://e-okul.meb.gov.tr/OrtaOgretim/OKL/*"
+        "https://e-okul.meb.gov.tr/OrtaOgretim/OKL/*",
+        "https://eokulyd.meb.gov.tr/OrtaOgretim/OKL/*"
       ],
       "css": [
         "css/content.css",
+        "css/font-awesome-pro-fab-base64.css",
+        "css/social-share.css",
         "css/dimmer.css"
       ],
       "js": [

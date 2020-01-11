@@ -1,3 +1,24 @@
+//region Content >> Google Analytics
+
+var _AnalyticsCode = 'UA-78480732-2';
+var _gaq = _gaq || [];
+
+_gaq.push(['_setAccount', _AnalyticsCode]);
+_gaq.push(['_trackPageview']);
+
+(function () {
+    var ga = document.createElement('script');
+    ga.type = 'text/javascript';
+    ga.async = true;
+    ga.src = 'https://ssl.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(ga, s);
+})();
+
+//endregion
+
+//region Content >> Listener
+
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
     if (!sender) {
@@ -5,6 +26,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
 
     if (request.command === "oku") {
+
+        _gaq.push(['_trackEvent', "ReadStart", 'read start']);
 
         read(request);
 
@@ -18,6 +41,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
     } else if (request.command === "kontrol") {
 
+        _gaq.push(['_trackEvent', "CheckStart", 'check start']);
+
         check(request);
 
     }
@@ -25,6 +50,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     return true;
 
 });
+
+//endregion
+
+//region Content >> Function
 
 function read(request) {
 
@@ -165,6 +194,9 @@ function read(request) {
 
                     if (ogrenci === "oku") {
 
+                        _gaq.push(['_trackEvent', "ReadEnd", 'read end']);
+                        _gaq.push(['_trackEvent', "CheckStart", 'check start']);
+
                         request.notGirisAlaniKontrol = notGirisAlaniKontrol;
                         request.notAlaniKontrol = notAlaniKontrol;
 
@@ -172,12 +204,20 @@ function read(request) {
 
                     } else if (ogrenci === "tamam") {
 
+                        _gaq.push(['_trackEvent', "ReadEnd", 'read end']);
+
                         focus(guvenlikKodu.el);
 
                         noteEntryComplete();
                         textToSpeech("Teşekkür ederim.", {rate: 1.1})
                             .then(function () {
                                 textToSpeech("Listeyi kaydedebilirsin.", {rate: 1.1})
+                                    .then(function () {
+                                        textToSpeech("Benimle çalışmanktan memnunsan, daha fazla öğretmenimize yardım edebilmem için destek olabilir misin?", {rate: 1.1})
+                                            .then(function () {
+                                                textToSpeech("Yorum ve paylaşımlarınla öneride bulunabilirsin.", {rate: 1.1})
+                                            })
+                                    })
                             })
 
                     } else if (ogrenci && !notAlani.dic.hasOwnProperty(ogrenci)) {
@@ -1324,10 +1364,18 @@ function check(request) {
 
         if (index === notAlani.inp.length) {
 
+            _gaq.push(['_trackEvent', "CheckEnd", 'check end']);
+
             focus(guvenlikKodu.el);
 
             noteEntryComplete();
-            textToSpeech("Bitti. Bu kadar.", {rate: 1});
+            textToSpeech("Bitti. Bu kadar.", {rate: 1})
+                .then(function () {
+                    textToSpeech("Benimle çalışmanktan memnunsan, daha fazla öğretmenimize yardım edebilmem için destek olabilir misin?", {rate: 1.1})
+                        .then(function () {
+                            textToSpeech("Yorum ve paylaşımlarınla öneride bulunabilirsin.", {rate: 1.1})
+                        })
+                })
 
         } else {
 
@@ -1380,3 +1428,87 @@ function check(request) {
     }
 
 }
+
+//endregion
+
+//region Content >> On Events
+
+(function onEvents(retries) {
+
+    setTimeout(function () {
+
+        var SocialShareBtnFacebook = document.getElementById("SocialShareBtnFacebook");
+        var SocialShareBtnTwitter = document.getElementById("SocialShareBtnTwitter");
+        var SocialShareBtnYoutube = document.getElementById("SocialShareBtnYoutube");
+        var SocialShareBtnLinkedin = document.getElementById("SocialShareBtnLinkedin");
+        var SocialShareBtnGoogle = document.getElementById("SocialShareBtnGoogle");
+
+        if (SocialShareBtnFacebook && SocialShareBtnTwitter && SocialShareBtnYoutube && SocialShareBtnLinkedin && SocialShareBtnGoogle) {
+
+            SocialShareBtnFacebook.addEventListener("click", function () {
+
+                _gaq.push(['_trackEvent', "ShareOnFacebook", 'share on facebook']);
+
+                textToSpeech("Teşekkür ederim.")
+                    .then(function () {
+                        textToSpeech("Senin de desteğin ile daha fazla öğretmenimize yardım edebileceğim.");
+                    });
+
+            });
+
+            SocialShareBtnTwitter.addEventListener("click", function () {
+
+                _gaq.push(['_trackEvent', "ShareOnTwitter", 'share on twitter']);
+
+                textToSpeech("Teşekkür ederim.")
+                    .then(function () {
+                        textToSpeech("Senin de desteğin ile daha fazla öğretmenimize yardım edebileceğim.");
+                    });
+
+            });
+
+            SocialShareBtnYoutube.addEventListener("click", function () {
+
+                _gaq.push(['_trackEvent', "ShareOnYoutube", 'share on youtube']);
+
+                textToSpeech("Teşekkür ederim.")
+                    .then(function () {
+                        textToSpeech("Video yorumuna düşüncelerini yazabilirsin.");
+                    });
+
+            });
+
+            SocialShareBtnLinkedin.addEventListener("click", function () {
+
+                _gaq.push(['_trackEvent', "ShareOnLinkedin", 'share on linkedin']);
+
+                textToSpeech("Teşekkür ederim.")
+                    .then(function () {
+                        textToSpeech("Senin de desteğin ile daha fazla öğretmenimize yardım edebileceğim.");
+                    });
+
+            });
+
+            SocialShareBtnGoogle.addEventListener("click", function () {
+
+                _gaq.push(['_trackEvent', "ShareOnGoogleStore", 'share on google store']);
+
+                textToSpeech("Teşekkür ederim.")
+                    .then(function () {
+                        textToSpeech("Yorum sekmesinden düşüncelerini paylaşabilirsin.");
+                    });
+
+            });
+
+        } else {
+            if (retries > 0)
+                onEvents(--retries);
+        }
+
+
+    }, 250);
+
+})(10);
+
+//endregion
+

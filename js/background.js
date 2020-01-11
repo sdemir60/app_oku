@@ -22,8 +22,10 @@ _gaq.push(['_trackPageview']);
 function checkURL(url) {
     return url.includes("https://eokul.meb.gov.tr/IlkOgretim/OKL") ||
         url.includes("https://e-okul.meb.gov.tr/IlkOgretim/OKL") ||
+        url.includes("https://eokulyd.meb.gov.tr/IlkOgretim/OKL") ||
         url.includes("https://eokul.meb.gov.tr/OrtaOgretim/OKL") ||
-        url.includes("https://e-okul.meb.gov.tr/OrtaOgretim/OKL");
+        url.includes("https://e-okul.meb.gov.tr/OrtaOgretim/OKL") ||
+        url.includes("https://eokulyd.meb.gov.tr/OrtaOgretim/OKL");
 }
 
 //endregion
@@ -93,9 +95,9 @@ chrome.commands.onCommand.addListener(function (command) {
 
 // chrome.runtime.onMessage.addListener(function (message) {
 
-    // TODO: 20 dil var. Türkçe aralarýnda yok. O yüzden kullanýlamadý.
-    // content.js den mesaj geçiyoruz: chrome.runtime.sendMessage({toSay: "hello sinan"}, function() {});
-    // background.js de kullanýyoruz: chrome.tts.speak(message.toSay, { rate: 0.8, onEvent: function(event) {}}, function() {});
+// TODO: 20 dil var. Türkçe aralarýnda yok. O yüzden kullanýlamadý.
+// content.js den mesaj geçiyoruz: chrome.runtime.sendMessage({toSay: "hello sinan"}, function() {});
+// background.js de kullanýyoruz: chrome.tts.speak(message.toSay, { rate: 0.8, onEvent: function(event) {}}, function() {});
 
 // });
 

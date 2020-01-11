@@ -1,0 +1,302 @@
+/*region Social Button >> Base*/
+
+.social-share-container {
+    padding-top: 10px;
+}
+
+.social-share-btn {
+    width: 54px;
+    height: 10px;
+    padding-left: 10px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-right: 45px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-left: 5px;
+}
+
+.social-share-btn i {
+    font-size: 20px;
+}
+
+.social-share-btn span {
+    font-family: "Roboto", sans-serif;
+    align-self: center;
+}
+
+.social-share-btn:active {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/*endregion*/
+
+/*region Social Button >> Instagram*/
+
+.social-share-btn-i {
+    background-color: #fff;
+    color: #c71e7e;
+    transition: all 0.2s ease-in-out;
+}
+
+.social-share-btn-i i {
+    color: #df3796;
+    padding-right: 10px;
+    transition: all 0.3s ease-in-out;
+}
+
+.social-share-btn-i span {
+    color: #c71e7e;
+    -webkit-transform: translateX(0px);
+    transform: translateX(0px);
+    transition: all 0.1s ease-in-out;
+    opacity: 1;
+}
+
+.social-share-btn-i:hover {
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
+    background: linear-gradient(to right, #ff3019 0%, #c90477 100%);
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.social-share-btn-i:hover i {
+    -webkit-transform: translateX(37px);
+    transform: translateX(37px);
+    padding-right: 0;
+    color: #fff;
+}
+
+.social-share-btn-i:hover span {
+    -webkit-transform: translateX(37px);
+    transform: translateX(37px);
+    opacity: 0;
+}
+
+/*endregion*/
+
+/*region Social Button >> Facebook*/
+
+.social-share-btn-f {
+    background-color: #fff;
+    color: #286ed6;
+    transition: all 0.2s ease-in-out;
+}
+
+.social-share-btn-f i {
+    color: #286ed6;
+    padding-right: 10px;
+    transition: all 0.3s ease-in-out;
+}
+
+.social-share-btn-f span {
+    color: #286ed6;
+    -webkit-transform: translateX(0px);
+    transform: translateX(0px);
+    transition: all 0.1s ease-in-out;
+    opacity: 1;
+}
+
+.social-share-btn-f:hover {
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
+    background: #286ed6;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.social-share-btn-f:hover i {
+    -webkit-transform: translateX(37px);
+    transform: translateX(37px);
+    padding-right: 0;
+    color: #fff;
+}
+
+.social-share-btn-f:hover span {
+    -webkit-transform: translateX(37px);
+    transform: translateX(37px);
+    opacity: 0;
+}
+
+/*endregion*/
+
+/*region Social Button >> Twitter*/
+
+.social-share-btn-t {
+    padding-left: 8px;
+    background-color: #fff;
+    color: #1c8ed6;
+    transition: all 0.2s ease-in-out;
+}
+
+.social-share-btn-t i {
+    color: #1c8ed6;
+    padding-right: 10px;
+    transition: all 0.3s ease-in-out;
+}
+
+.social-share-btn-t span {
+    color: #1c8ed6;
+    -webkit-transform: translateX(0px);
+    transform: translateX(0px);
+    transition: all 0.1s ease-in-out;
+    opacity: 1;
+}
+
+.social-share-btn-t:hover {
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
+    background: #1c8ed6;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.social-share-btn-t:hover i {
+    -webkit-transform: translateX(37px);
+    transform: translateX(37px);
+    padding-right: 0;
+    color: #fff;
+}
+
+.social-share-btn-t:hover span {
+    -webkit-transform: translateX(37px);
+    transform: translateX(37px);
+    opacity: 0;
+}
+
+/*endregion*/
+
+/*region Social Button >> Youtube*/
+
+.social-share-btn-y {
+    padding-left: 8px;
+    background-color: #fff;
+    color: #f00;
+    transition: all 0.2s ease-in-out;
+}
+
+.social-share-btn-y i {
+    color: #f00;
+    padding-right: 8px;
+    transition: all 0.3s ease-in-out;
+}
+
+.social-share-btn-y span {
+    color: #f00;
+    -webkit-transform: translateX(0px);
+    transform: translateX(0px);
+    transition: all 0.1s ease-in-out;
+    opacity: 1;
+}
+
+.social-share-btn-y:hover {
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
+    background: #f00;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.social-share-btn-y:hover i {
+    -webkit-transform: translateX(37px);
+    transform: translateX(37px);
+    padding-right: 0;
+    color: #fff;
+}
+
+.social-share-btn-y:hover span {
+    -webkit-transform: translateX(37px);
+    transform: translateX(37px);
+    opacity: 0;
+}
+
+/*endregion*/
+
+/*region Social Button >> Linkedin*/
+
+.social-share-btn-l {
+    background-color: #fff;
+    color: #0077b5;
+    transition: all 0.2s ease-in-out;
+}
+
+.social-share-btn-l i {
+    color: #0077b5;
+    padding-right: 10px;
+    transition: all 0.3s ease-in-out;
+}
+
+.social-share-btn-l span {
+    color: #0077b5;
+    -webkit-transform: translateX(0px);
+    transform: translateX(0px);
+    transition: all 0.1s ease-in-out;
+    opacity: 1;
+}
+
+.social-share-btn-l:hover {
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
+    background: #0077b5;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.social-share-btn-l:hover i {
+    -webkit-transform: translateX(37px);
+    transform: translateX(37px);
+    padding-right: 0;
+    color: #fff;
+}
+
+.social-share-btn-l:hover span {
+    -webkit-transform: translateX(37px);
+    transform: translateX(37px);
+    opacity: 0;
+}
+
+/*endregion*/
+
+/*region Social Button >> Google*/
+
+.social-share-btn-g {
+    background-color: #fff;
+    color: #4285f4;
+    transition: all 0.2s ease-in-out;
+}
+
+.social-share-btn-g i {
+    color: #4285f4;
+    padding-right: 10px;
+    transition: all 0.3s ease-in-out;
+}
+
+.social-share-btn-g span {
+    color: #4285f4;
+    -webkit-transform: translateX(0px);
+    transform: translateX(0px);
+    transition: all 0.1s ease-in-out;
+    opacity: 1;
+}
+
+.social-share-btn-g:hover {
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
+    background: #4285f4;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.social-share-btn-g:hover i {
+    -webkit-transform: translateX(37px);
+    transform: translateX(37px);
+    padding-right: 0;
+    color: #fff;
+}
+
+.social-share-btn-g:hover span {
+    -webkit-transform: translateX(37px);
+    transform: translateX(37px);
+    opacity: 0;
+}
+
+/*endregion*/
