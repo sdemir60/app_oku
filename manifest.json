@@ -2,7 +2,7 @@
   "name": "OKU",
   "short_name": "OKU",
   "description": "e-Okul Sesli Ders Notu Girişi",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "manifest_version": 2,
   "icons": {
     "128": "img/OKU128.png"
