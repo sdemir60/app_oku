@@ -1,22 +1,3 @@
-//region Content >> Google Analytics
-
-var _AnalyticsCode = 'UA-78480732-2';
-var _gaq = _gaq || [];
-
-_gaq.push(['_setAccount', _AnalyticsCode]);
-_gaq.push(['_trackPageview']);
-
-(function () {
-    var ga = document.createElement('script');
-    ga.type = 'text/javascript';
-    ga.async = true;
-    ga.src = 'https://ssl.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(ga, s);
-})();
-
-//endregion
-
 //region Content >> Listener
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -27,7 +8,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
     if (request.command === "oku") {
 
-        _gaq.push(['_trackEvent', "ReadStart", 'read start']);
+        chrome.runtime.sendMessage({type: "analytics", category: "ReadStart", transaction: "read start"});
 
         read(request);
 
@@ -41,7 +22,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
     } else if (request.command === "kontrol") {
 
-        _gaq.push(['_trackEvent', "CheckStart", 'check start']);
+        chrome.runtime.sendMessage({type: "analytics", category: "CheckStart", transaction: "check start"});
 
         check(request);
 
@@ -196,8 +177,8 @@ function read(request) {
 
                     if (ogrenci === "oku") {
 
-                        _gaq.push(['_trackEvent', "ReadEnd", 'read end']);
-                        _gaq.push(['_trackEvent', "CheckStart", 'check start']);
+                        chrome.runtime.sendMessage({type: "analytics", category: "ReadEnd", transaction: "read end"});
+                        chrome.runtime.sendMessage({type: "analytics", category: "CheckStart", transaction: "check start"});
 
                         request.notGirisAlaniKontrol = notGirisAlaniKontrol;
                         request.notAlaniKontrol = notAlaniKontrol;
@@ -206,7 +187,7 @@ function read(request) {
 
                     } else if (ogrenci === "tamam") {
 
-                        _gaq.push(['_trackEvent', "ReadEnd", 'read end']);
+                        chrome.runtime.sendMessage({type: "analytics", category: "ReadEnd", transaction: "read end"});
 
                         focus(guvenlikKodu.el);
 
@@ -279,7 +260,7 @@ function read(request) {
 
                                     } else {
 
-                                        sendAbnormal(_gaq, "AbnormalStudentScore", text, not);
+                                        sendAbnormal(chrome, "student score","AbnormalStudentScore", text, not);
 
                                         blur();
 
@@ -315,7 +296,7 @@ function read(request) {
 
                     } else {
 
-                        sendAbnormal(_gaq, "AbnormalStudentNumber", studentNum, ogrenci);
+                        sendAbnormal(chrome,"student number", "AbnormalStudentNumber", studentNum, ogrenci);
 
                         blur();
 
@@ -1370,7 +1351,7 @@ function check(request) {
 
         if (index === notAlani.inp.length) {
 
-            _gaq.push(['_trackEvent', "CheckEnd", 'check end']);
+            chrome.runtime.sendMessage({type: "analytics", category: "CheckEnd", transaction: "check end"});
 
             focus(guvenlikKodu.el);
 
@@ -1453,7 +1434,7 @@ function check(request) {
 
             SocialShareBtnFacebook.addEventListener("click", function () {
 
-                _gaq.push(['_trackEvent', "ShareOnFacebook", 'share on facebook']);
+                chrome.runtime.sendMessage({type: "analytics", category: "ShareOnFacebook", transaction: "share on facebook"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -1464,7 +1445,7 @@ function check(request) {
 
             SocialShareBtnTwitter.addEventListener("click", function () {
 
-                _gaq.push(['_trackEvent', "ShareOnTwitter", 'share on twitter']);
+                chrome.runtime.sendMessage({type: "analytics", category: "ShareOnTwitter", transaction: "share on twitter"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -1475,7 +1456,7 @@ function check(request) {
 
             SocialShareBtnYoutube.addEventListener("click", function () {
 
-                _gaq.push(['_trackEvent', "ShareOnYoutube", 'share on youtube']);
+                chrome.runtime.sendMessage({type: "analytics", category: "ShareOnYoutube", transaction: "share on youtube"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -1486,7 +1467,7 @@ function check(request) {
 
             SocialShareBtnLinkedin.addEventListener("click", function () {
 
-                _gaq.push(['_trackEvent', "ShareOnLinkedin", 'share on linkedin']);
+                chrome.runtime.sendMessage({type: "analytics", category: "ShareOnLinkedin", transaction: "share on linkedin"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -1497,7 +1478,7 @@ function check(request) {
 
             SocialShareBtnGoogle.addEventListener("click", function () {
 
-                _gaq.push(['_trackEvent', "ShareOnGoogleStore", 'share on google store']);
+                chrome.runtime.sendMessage({type: "analytics", category: "ShareOnGoogleStore", transaction: "share on google store"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {

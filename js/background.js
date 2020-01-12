@@ -93,12 +93,18 @@ chrome.commands.onCommand.addListener(function (command) {
 
 //region Background >> Runtime >> onMessage
 
-// chrome.runtime.onMessage.addListener(function (message) {
+chrome.runtime.onMessage.addListener(function (message) {
 
-// TODO: 20 dil var. Türkçe aralarýnda yok. O yüzden kullanýlamadý.
-// content.js den mesaj geçiyoruz: chrome.runtime.sendMessage({toSay: "hello sinan"}, function() {});
-// background.js de kullanýyoruz: chrome.tts.speak(message.toSay, { rate: 0.8, onEvent: function(event) {}}, function() {});
+    if (message.type === "analytics") {
+        _gaq.push(['_trackEvent', message.category, message.transaction]);
+    }
 
-// });
+});
 
 //endregion
+
+// chrome.runtime.onMessage.addListener(function (message) {
+// TODO: 20 dil var. T?rk?e aralar?nda yok. O y?zden kullan?lamad?.
+// content.js den mesaj ge?iyoruz: chrome.runtime.sendMessage({toSay: "hello sinan"}, function() {});
+// background.js de kullan?yoruz: chrome.tts.speak(message.toSay, { rate: 0.8, onEvent: function(event) {}}, function() {});
+

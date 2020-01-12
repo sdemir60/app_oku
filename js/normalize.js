@@ -56,16 +56,16 @@ function speakNumberNormalize(abnormalNum, defaultNum) {
     return normalNum;
 }
 
-function sendAbnormal(_gaq, category, abnormalText, abnormalNum) {
+function sendAbnormal(chrome, caption, category, abnormalText, abnormalNum) {
 
     abnormalText = abnormalText || abnormalText === 0 || abnormalText === "" ? abnormalText.toString().trim() : null;
     abnormalNum = abnormalNum || abnormalNum === 0 || abnormalNum === "" ? abnormalNum.toString().trim() : null;
 
     if (abnormalText || abnormalNum) {
 
-        var transaction = "abnormal text:" + abnormalText + ", number:" + abnormalNum;
+        var transaction = "abnormal " + caption + " text:" + abnormalText + ", number:" + abnormalNum;
 
-        _gaq.push(['_trackEvent', category, transaction]);
+        chrome.runtime.sendMessage({type: "analytics", category: category, transaction: transaction});
 
     }
 
