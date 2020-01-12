@@ -20,9 +20,22 @@ function speechNumberNormalize(abnormalNum, defaultNum) {
         case "yüz":
             normalNum = "100";
             break;
+        case "g":
+            normalNum = "G";
+            break;
+        case "y":
+            normalNum = "G";
+            break;
+        case "gelmedi":
+            normalNum = "G";
+            break;
+        case "girmedi":
+            normalNum = "G";
+            break;
     }
 
-    normalNum = !isNaN(parseInt(normalNum)) ? parseInt(normalNum) : defaultNum;
+    if (normalNum !== "G")
+        normalNum = !isNaN(parseInt(normalNum)) ? parseInt(normalNum) : defaultNum;
 
     return normalNum;
 }
@@ -41,4 +54,19 @@ function speakNumberNormalize(abnormalNum, defaultNum) {
     }
 
     return normalNum;
+}
+
+function sendAbnormal(_gaq, category, abnormalText, abnormalNum) {
+
+    abnormalText = abnormalText || abnormalText === 0 || abnormalText === "" ? abnormalText.toString().trim() : null;
+    abnormalNum = abnormalNum || abnormalNum === 0 || abnormalNum === "" ? abnormalNum.toString().trim() : null;
+
+    if (abnormalText || abnormalNum) {
+
+        var transaction = "abnormal text:" + abnormalText + ", number:" + abnormalNum;
+
+        _gaq.push(['_trackEvent', category, transaction]);
+
+    }
+
 }

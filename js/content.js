@@ -184,6 +184,8 @@ function read(request) {
             .then(
                 function (ogrenci) {
 
+                    var studentNum = ogrenci;
+
                     if (ogrenci && ogrenci.includes("oku")) {
                         ogrenci = "oku";
                     } else if (ogrenci && ogrenci.includes("tamam")) {
@@ -266,7 +268,7 @@ function read(request) {
 
                                     var not = speechNumberNormalize(text, -1);
 
-                                    if (0 <= not && not <= 100) {
+                                    if ((0 <= not && not <= 100) || not === "G") {
 
                                         notAlani.dic[ogrenci].el[0].value = not;
                                         notlariGir();
@@ -276,6 +278,8 @@ function read(request) {
                                         notAlaniKontrol.inp.push(notAlani.dic[ogrenci].el);
 
                                     } else {
+
+                                        sendAbnormal(_gaq, "AbnormalStudentScore", text, not);
 
                                         blur();
 
@@ -310,6 +314,8 @@ function read(request) {
                             );
 
                     } else {
+
+                        sendAbnormal(_gaq, "AbnormalStudentNumber", studentNum, ogrenci);
 
                         blur();
 
