@@ -47,11 +47,12 @@ function speakNumberNormalize(abnormalNum, defaultNum) {
     if (abnormalNum || abnormalNum === 0 | abnormalNum === "0")
         normalNum = abnormalNum.toString();
 
-    switch (normalNum) {
-        case "0":
-            normalNum = "sıfır";
-            break;
-    }
+    // TODO: ResponsivevoiceJS kaldırıldı. İhtiyaç kalmadı.
+    // switch (normalNum) {
+    //     case "0":
+    //         normalNum = "sıfır";
+    //         break;
+    // }
 
     return normalNum;
 }

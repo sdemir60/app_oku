@@ -19,6 +19,10 @@ _gaq.push(['_trackPageview']);
 
 //region Background >> Function
 
+Date.prototype.getShortDate = function () {
+    return this.getDate() + "." + (this.getMonth() + 1) + "." + this.getFullYear();
+};
+
 function checkURL(url) {
     return url.includes("https://eokul.meb.gov.tr/IlkOgretim/OKL") ||
         url.includes("https://e-okul.meb.gov.tr/IlkOgretim/OKL") ||
@@ -28,16 +32,39 @@ function checkURL(url) {
         url.includes("https://eokulyd.meb.gov.tr/OrtaOgretim/OKL");
 }
 
+function createNotification() {
+
+    var dateTimeNow = (new Date()).getShortDate();
+
+    if (localStorage.initializedDate !== dateTimeNow) {
+
+        new Notification("OKU", {
+            icon: 'img/OKU128.png',
+            body: 'e-Okul sesli ders notu girişi. Öğretmenlerimiz "hızlı not girişi" ekranından, hızlı not girebilsin diye...'
+        });
+
+        localStorage.initializedDate = dateTimeNow;
+
+    }
+
+}
+
 //endregion
 
 //region Background >> Tabs >> onUpdated
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+
     if (changeInfo.status === "complete" && checkURL(tab.url)) {
+
+        createNotification();
+
         chrome.tabs.executeScript(tabId, {file: "js/xlsx.full.min.js"}, function () {
             chrome.tabs.executeScript(tabId, {file: "js/script.js"})
         })
+
     }
+
 });
 
 //endregion
@@ -104,7 +131,6 @@ chrome.runtime.onMessage.addListener(function (message) {
 //endregion
 
 // chrome.runtime.onMessage.addListener(function (message) {
-// TODO: 20 dil var. T?rk?e aralar?nda yok. O y?zden kullan?lamad?.
+// TODO: 20 dil var. Türkçe aralarında yok. O yüzden kullanılamadı.
 // content.js den mesaj ge?iyoruz: chrome.runtime.sendMessage({toSay: "hello sinan"}, function() {});
 // background.js de kullan?yoruz: chrome.tts.speak(message.toSay, { rate: 0.8, onEvent: function(event) {}}, function() {});
-

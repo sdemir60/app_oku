@@ -63,7 +63,7 @@ function createShareButton() {
     var table = document.getElementById("Table5");
     var container = document.createElement("div");
 
-    if (table) {
+    if (table && !table.classList.contains("added-share-buttons")) {
 
         var btnFacebook = document.createElement("a");
         var btnFacebookI = document.createElement("i");
@@ -136,6 +136,7 @@ function createShareButton() {
         container.appendChild(btnFacebook);
         container.appendChild(btnLinkedin);
 
+        table.classList.add("added-share-buttons");
     }
 }
 

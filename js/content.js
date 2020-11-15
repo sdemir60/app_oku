@@ -125,11 +125,10 @@ function read(request) {
             textToSpeech(
                 "Not giriş alanı açık değil.",
                 {
-                    call: doNotUnderstand,
-                    rate: 1.1
+                    call: doNotUnderstand
                 })
                 .then(function () {
-                    textToSpeech("Lütfen giriş yapmak istediğiniz alanı seçerek sınıfı listeleyiniz.", {rate: 1.1})
+                    textToSpeech("Lütfen giriş yapmak istediğiniz alanı seçerek sınıfı listeleyiniz.")
                         .then(function () {
                             reject();
                         });
@@ -139,7 +138,7 @@ function read(request) {
 
             textToSpeech("Selâmun aleyküm.")
                 .then(function () {
-                    textToSpeech("İlk sesi duyduğunda öğrencinin okul numarasını, ikinci sesi duyduğunda notunu okumalısın. Not girişi tamamlandığında bana 'tamam' diye seslenerek işlemi bitirebilir, 'oku' diye seslenerek giriş yaptığım notları kontrol edebilirsin.", {rate: 1.1})
+                    textToSpeech("İlk sesi duyduğunda öğrencinin okul numarasını, ikinci sesi duyduğunda notunu okumalısın. Not girişi tamamlandığında bana 'tamam' diye seslenerek işlemi bitirebilir, 'oku' diye seslenerek giriş yaptığım notları kontrol edebilirsin.")
                         .then(function () {
                             textToSpeech("Ben hazırım.")
                                 .then(function () {
@@ -178,7 +177,11 @@ function read(request) {
                     if (ogrenci === "oku") {
 
                         chrome.runtime.sendMessage({type: "analytics", category: "ReadEnd", transaction: "read end"});
-                        chrome.runtime.sendMessage({type: "analytics", category: "CheckStart", transaction: "check start"});
+                        chrome.runtime.sendMessage({
+                            type: "analytics",
+                            category: "CheckStart",
+                            transaction: "check start"
+                        });
 
                         request.notGirisAlaniKontrol = notGirisAlaniKontrol;
                         request.notAlaniKontrol = notAlaniKontrol;
@@ -192,13 +195,13 @@ function read(request) {
                         focus(guvenlikKodu.el);
 
                         noteEntryComplete();
-                        textToSpeech("Teşekkür ederim.", {rate: 1.1})
+                        textToSpeech("Teşekkür ederim.")
                             .then(function () {
-                                textToSpeech("Listeyi kaydedebilirsin.", {rate: 1.1})
+                                textToSpeech("Listeyi kaydedebilirsin.")
                                     .then(function () {
-                                        textToSpeech("Benimle çalışmanktan memnunsan, daha fazla öğretmenimize yardım edebilmem için destek olabilir misin?", {rate: 1.1})
+                                        textToSpeech("Benimle çalışmanktan memnunsan, daha fazla öğretmenimize yardım edebilmem için destek olabilir misin?")
                                             .then(function () {
-                                                textToSpeech("Yorum ve paylaşımlarınla öneride bulunabilirsin.", {rate: 1.1})
+                                                textToSpeech("Yorum ve paylaşımlarınla öneride bulunabilirsin.")
                                             })
                                     })
                             })
@@ -207,16 +210,14 @@ function read(request) {
 
                         blur();
 
-                        textToSpeech(
-                            speakNumberNormalize(ogrenci.toString()) + " numaralı öğrenciyi bulamadım. Kontrol edebilir misin?",
-                            {
-                                call: doNotUnderstand,
-                                rate: 1.1
-                            })
+                        numberToSpeech(speakNumberNormalize(ogrenci.toString()), {call: doNotUnderstand})
                             .then(function () {
-                                textToSpeech("Seni dinliyorum?")
+                                textToSpeech(" numaralı öğrenciyi bulamadım. Kontrol edebilir misin?")
                                     .then(function () {
-                                        notlariGir();
+                                        textToSpeech("Seni dinliyorum?")
+                                            .then(function () {
+                                                notlariGir();
+                                            });
                                     });
                             });
 
@@ -224,16 +225,14 @@ function read(request) {
 
                         blur();
 
-                        textToSpeech(
-                            speakNumberNormalize(ogrenci.toString()) + " numaralı öğrenci için not alanı kapalı. Kontrol edebilir misin?",
-                            {
-                                call: doNotUnderstand,
-                                rate: 1.1
-                            })
+                        numberToSpeech(speakNumberNormalize(ogrenci.toString()), {call: doNotUnderstand})
                             .then(function () {
-                                textToSpeech("Seni dinliyorum?")
+                                textToSpeech(" numaralı öğrenci için not alanı kapalı. Kontrol edebilir misin?")
                                     .then(function () {
-                                        notlariGir();
+                                        textToSpeech("Seni dinliyorum?")
+                                            .then(function () {
+                                                notlariGir();
+                                            });
                                     });
                             });
 
@@ -260,15 +259,14 @@ function read(request) {
 
                                     } else {
 
-                                        sendAbnormal(chrome, "student score","AbnormalStudentScore", text, not);
+                                        sendAbnormal(chrome, "student score", "AbnormalStudentScore", text, not);
 
                                         blur();
 
                                         textToSpeech(
                                             "Yanlışmı anladım acaba. Öğrencinin numarasını ve notunu tekrar söylermisin?",
                                             {
-                                                call: doNotUnderstand,
-                                                rate: 1.1
+                                                call: doNotUnderstand
                                             })
                                             .then(function () {
                                                 notlariGir();
@@ -284,8 +282,7 @@ function read(request) {
                                     textToSpeech(
                                         "Anlamadım. Öğrencinin numarasını ve notunu tekrar söylermisin?",
                                         {
-                                            call: doNotUnderstand,
-                                            rate: 1.1
+                                            call: doNotUnderstand
                                         })
                                         .then(function () {
                                             notlariGir();
@@ -296,15 +293,14 @@ function read(request) {
 
                     } else {
 
-                        sendAbnormal(chrome,"student number", "AbnormalStudentNumber", studentNum, ogrenci);
+                        sendAbnormal(chrome, "student number", "AbnormalStudentNumber", studentNum, ogrenci);
 
                         blur();
 
                         textToSpeech(
                             "Yanlışmı anladım acaba. Tekrar söylermisin?",
                             {
-                                call: doNotUnderstand,
-                                rate: 1.1
+                                call: doNotUnderstand
                             })
                             .then(function () {
                                 notlariGir();
@@ -321,8 +317,7 @@ function read(request) {
                     textToSpeech(
                         "Anlamadım. Tekrar söylermisin?",
                         {
-                            call: doNotUnderstand,
-                            rate: 1.1
+                            call: doNotUnderstand
                         })
                         .then(function () {
                             notlariGir();
@@ -1306,11 +1301,10 @@ function check(request) {
             textToSpeech(
                 "Not giriş alanı açık değil.",
                 {
-                    call: doNotUnderstand,
-                    rate: 1.1
+                    call: doNotUnderstand
                 })
                 .then(function () {
-                    textToSpeech("Lütfen kontrol etmek istediğiniz alanı seçerek sınıfı listeleyiniz.", {rate: 1.1})
+                    textToSpeech("Lütfen kontrol etmek istediğiniz alanı seçerek sınıfı listeleyiniz.")
                         .then(function () {
                             reject();
                         });
@@ -1318,7 +1312,7 @@ function check(request) {
 
         } else if (fromRead) {
 
-            textToSpeech("Notları girdiğim sıraya göre önce öğrencinin okul numarasını sonra notunu okuyacağım.", {rate: 1.1})
+            textToSpeech("Notları girdiğim sıraya göre önce öğrencinin okul numarasını sonra notunu okuyacağım.")
                 .then(function () {
                     textToSpeech("Beni takip et.")
                         .then(function () {
@@ -1330,7 +1324,7 @@ function check(request) {
 
             textToSpeech("Selâmun aleyküm.")
                 .then(function () {
-                    textToSpeech("Önce öğrencinin okul numarasını sonra notunu okuyacağım.", {rate: 1.1})
+                    textToSpeech("Önce öğrencinin okul numarasını sonra notunu okuyacağım.")
                         .then(function () {
                             textToSpeech("Beni takip et.")
                                 .then(function () {
@@ -1356,11 +1350,11 @@ function check(request) {
             focus(guvenlikKodu.el);
 
             noteEntryComplete();
-            textToSpeech("Bitti. Bu kadar.", {rate: 1})
+            textToSpeech("Bitti. Bu kadar.")
                 .then(function () {
-                    textToSpeech("Benimle çalışmanktan memnunsan, daha fazla öğretmenimize yardım edebilmem için destek olabilir misin?", {rate: 1.1})
+                    textToSpeech("Benimle çalışmanktan memnunsan, daha fazla öğretmenimize yardım edebilmem için destek olabilir misin?")
                         .then(function () {
-                            textToSpeech("Yorum ve paylaşımlarınla öneride bulunabilirsin.", {rate: 1.1})
+                            textToSpeech("Yorum ve paylaşımlarınla öneride bulunabilirsin.")
                         })
                 })
 
@@ -1371,14 +1365,14 @@ function check(request) {
             focusInput()
                 .then(function () {
 
-                    textToSpeech(speakNumberNormalize(notAlani.txt[index]), {rate: 1})
+                    numberToSpeech(speakNumberNormalize(notAlani.txt[index]), {rate: 1})
                         .then(function () {
 
                             var not = $(notAlani.inp[index]).val().toString();
 
                             not = not === "" ? "Boş." : not;
 
-                            textToSpeech(speakNumberNormalize(not), {rate: 1})
+                            numberToSpeech(speakNumberNormalize(not), {rate: 1})
                                 .then(function () {
 
                                     notlariOku(++index);
@@ -1434,7 +1428,11 @@ function check(request) {
 
             SocialShareBtnFacebook.addEventListener("click", function () {
 
-                chrome.runtime.sendMessage({type: "analytics", category: "ShareOnFacebook", transaction: "share on facebook"});
+                chrome.runtime.sendMessage({
+                    type: "analytics",
+                    category: "ShareOnFacebook",
+                    transaction: "share on facebook"
+                });
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -1445,7 +1443,11 @@ function check(request) {
 
             SocialShareBtnTwitter.addEventListener("click", function () {
 
-                chrome.runtime.sendMessage({type: "analytics", category: "ShareOnTwitter", transaction: "share on twitter"});
+                chrome.runtime.sendMessage({
+                    type: "analytics",
+                    category: "ShareOnTwitter",
+                    transaction: "share on twitter"
+                });
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -1456,7 +1458,11 @@ function check(request) {
 
             SocialShareBtnYoutube.addEventListener("click", function () {
 
-                chrome.runtime.sendMessage({type: "analytics", category: "ShareOnYoutube", transaction: "share on youtube"});
+                chrome.runtime.sendMessage({
+                    type: "analytics",
+                    category: "ShareOnYoutube",
+                    transaction: "share on youtube"
+                });
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -1467,7 +1473,11 @@ function check(request) {
 
             SocialShareBtnLinkedin.addEventListener("click", function () {
 
-                chrome.runtime.sendMessage({type: "analytics", category: "ShareOnLinkedin", transaction: "share on linkedin"});
+                chrome.runtime.sendMessage({
+                    type: "analytics",
+                    category: "ShareOnLinkedin",
+                    transaction: "share on linkedin"
+                });
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -1478,7 +1488,11 @@ function check(request) {
 
             SocialShareBtnGoogle.addEventListener("click", function () {
 
-                chrome.runtime.sendMessage({type: "analytics", category: "ShareOnGoogleStore", transaction: "share on google store"});
+                chrome.runtime.sendMessage({
+                    type: "analytics",
+                    category: "ShareOnGoogleStore",
+                    transaction: "share on google store"
+                });
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -1491,7 +1505,6 @@ function check(request) {
             if (retries > 0)
                 onEvents(--retries);
         }
-
 
     }, 250);
 
