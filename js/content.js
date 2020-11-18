@@ -1370,7 +1370,7 @@ function check(request) {
 
                             var not = $(notAlani.inp[index]).val().toString();
 
-                            not = not === "" ? "Boş." : not;
+                            not = not === "" ? "BOS" : not;
 
                             numberToSpeech(speakNumberNormalize(not), {rate: 1})
                                 .then(function () {

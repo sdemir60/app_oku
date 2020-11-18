@@ -38,12 +38,17 @@ function createNotification() {
 
     if (localStorage.initializedDate !== dateTimeNow) {
 
-        new Notification("OKU", {
+        localStorage.initializedDate = dateTimeNow;
+
+        var notification = new Notification("OKU", {
             icon: 'img/OKU128.png',
             body: 'e-Okul sesli ders notu girişi. Öğretmenlerimiz "hızlı not girişi" ekranından, hızlı not girebilsin diye...'
         });
 
-        localStorage.initializedDate = dateTimeNow;
+        notification.onclick = function(){
+            chrome.tabs.create({url: 'https://www.youtube.com/watch?v=r_Ex-PKJ-P4&feature=emb_title'});
+            _gaq.push(['_trackEvent', "Notification", 'notification clicked']);
+        };
 
     }
 
