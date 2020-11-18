@@ -29,6 +29,9 @@ function speechNumberNormalize(abnormalNum, defaultNum) {
         case "gelmedi":
             normalNum = "G";
             break;
+        case "gelmedin":
+            normalNum = "G";
+            break;
         case "girmedi":
             normalNum = "G";
             break;
