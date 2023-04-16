@@ -1,5 +1,4 @@
-  ## OKU
-  #### Chrome eklentisi ile e-Okul Sesli Ders Notu Girişi
+  ## OKU | Chrome Eklentisi
 
 "OKU" chrome eklentisi: e-Okul sistemine sesli olarak hızlı ve pratik bir şekilde not girişi sağlar. Sınav dönemlerinde öğretmenlerimizin en büyük yardımcısı olur.
 
