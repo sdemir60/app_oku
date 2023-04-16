@@ -293,12 +293,9 @@ function writeTable(sinif) {
 
         }, 250)
 
-    } else {
-        // TODO : lütfen giriş yapmak istediğiniz alanı seçiniz. Alert ekle.
     }
 
     $('#gradeFile').val('');
-
 }
 
 //endregion

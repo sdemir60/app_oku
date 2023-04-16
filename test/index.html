@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html lang="tr">
+
+<head>
+
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Sinan DEMİR"/>
+
+    <title>OKU | Speech To Text Test</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="jquery-3.3.0.js"></script>
+    <script src="script.js"></script>
+
+</head>
+<body>
+
+<div class="container">
+
+    <div class="text">
+        <input id="event" placeholder="EVENTS" disabled>
+        <input id="test" placeholder="TEST">
+        <textarea id="text" disabled></textarea>
+    </div>
+    <div class="buttons">
+        <button id="start" onclick="startOnlick(event)">BAŞLAT</button>
+        <button id="stop" onclick="stopOnlick(event)">BİTİR</button>
+        <button id="debugview" onclick="debugviewOnlick(event)">GA DEBUGVIEW</button>
+    </div>
+
+</div>
+
+</body>
+
+<script async src="gtag-core.js"></script>
+<script src="gtag-init.js"></script>
+
+</html>

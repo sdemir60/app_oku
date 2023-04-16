@@ -2,25 +2,30 @@
   "name": "OKU",
   "short_name": "OKU",
   "description": "e-Okul Sesli Ders Notu Girişi",
-  "version": "3.2.0",
-  "manifest_version": 2,
+  "version": "4.0.0",
+  "manifest_version": 3,
   "icons": {
     "128": "img/OKU128.png"
   },
   "permissions": [
+    "storage",
+    "tabs",
+    "downloads",
+    "activeTab",
+    "notifications",
+    "scripting"
+  ],
+  "host_permissions": [
     "https://eokul.meb.gov.tr/IlkOgretim/OKL/*",
     "https://e-okul.meb.gov.tr/IlkOgretim/OKL/*",
     "https://eokulyd.meb.gov.tr/IlkOgretim/OKL/*",
     "https://eokul.meb.gov.tr/OrtaOgretim/OKL/*",
     "https://e-okul.meb.gov.tr/OrtaOgretim/OKL/*",
-    "https://eokulyd.meb.gov.tr/OrtaOgretim/OKL/*",
-    "storage",
-    "tabs",
-    "downloads",
-    "activeTab",
-    "notifications"
+    "https://eokulyd.meb.gov.tr/OrtaOgretim/OKL/*"
   ],
-  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  },
   "commands": {
     "tanitim": {
       "suggested_key": {
@@ -64,9 +69,7 @@
     }
   },
   "background": {
-    "scripts": [
-      "js/background.js"
-    ]
+    "service_worker": "js/background.js"
   },
   "content_scripts": [
     {
@@ -94,14 +97,18 @@
         "js/storage.js",
         "js/normalize.js",
         "js/aspx.js",
+        "js/enum.js",
         "js/animation.js",
-        "js/content.js",
         "js/sound.js",
-        "js/speech.js"
+        "js/speech.js",
+        "js/auxiliary.js",
+        "js/content.js",
+        "js/gtag-core.js",
+        "js/gtag-init.js"
       ]
     }
   ],
-  "browser_action": {
+  "action": {
     "default_popup": "html/popup.html",
     "default_icon": "img/OKU128.png"
   },
@@ -115,13 +122,20 @@
     }
   ],
   "web_accessible_resources": [
-    "img/OKU16.png",
-    "img/OKU32.png",
-    "img/OKU48.png",
-    "img/OKU128.png",
-    "doc/*.pdf",
-    "aud/*.mp3",
-    "aud/text/*.mp3",
-    "aud/number/*.mp3"
+    {
+      "resources": [
+        "img/OKU16.png",
+        "img/OKU32.png",
+        "img/OKU48.png",
+        "img/OKU128.png",
+        "doc/*.pdf",
+        "aud/*.mp3",
+        "aud/text/*.mp3",
+        "aud/number/*.mp3"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
   ]
 }

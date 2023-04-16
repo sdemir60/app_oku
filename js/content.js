@@ -2,33 +2,38 @@
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
-    if (!sender) {
-        return;
+    try {
+
+        if (request && sender) {
+
+            if (request.command === "analytics") {
+
+                gtag('event', request.category, {'event': request.transaction});
+
+            } else if (request.command === "oku") {
+
+                read(request);
+
+            } else if (request.command === "indir") {
+
+                download(request, sendResponse);
+
+            } else if (request.command === "yukle") {
+
+                upload();
+
+            } else if (request.command === "kontrol") {
+
+                check(request);
+
+            }
+
+        }
+
+    } catch (err) {
+
+
     }
-
-    if (request.command === "oku") {
-
-        chrome.runtime.sendMessage({type: "analytics", category: "ReadStart", transaction: "read start"});
-
-        read(request);
-
-    } else if (request.command === "indir") {
-
-        download(request, sendResponse);
-
-    } else if (request.command === "yukle") {
-
-        upload();
-
-    } else if (request.command === "kontrol") {
-
-        chrome.runtime.sendMessage({type: "analytics", category: "CheckStart", transaction: "check start"});
-
-        check(request);
-
-    }
-
-    return true;
 
 });
 
@@ -43,6 +48,8 @@ function read(request) {
     var notAlani = {el: null, dic: {}};
     var notGirisAlaniKontrol = {el: null, cbx: [], idx: -1};
     var notAlaniKontrol = {el: null, txt: [], inp: []};
+
+    var lastFoundStudentNo = null;
 
     if (request.url.includes("IlkOgretim")) {
 
@@ -116,7 +123,7 @@ function read(request) {
 
     })();
 
-    function bilgilendir() {
+    function inform() {
 
         var resolve, reject;
 
@@ -125,7 +132,7 @@ function read(request) {
             textToSpeech(
                 "Not giriş alanı açık değil.",
                 {
-                    call: doNotUnderstand
+                    call: doNotUnderstandPlay
                 })
                 .then(function () {
                     textToSpeech("Lütfen giriş yapmak istediğiniz alanı seçerek sınıfı listeleyiniz.")
@@ -138,13 +145,31 @@ function read(request) {
 
             textToSpeech("Selâmun aleyküm.")
                 .then(function () {
-                    textToSpeech("İlk sesi duyduğunda öğrencinin okul numarasını, ikinci sesi duyduğunda notunu okumalısın. Not girişi tamamlandığında bana 'tamam' diye seslenerek işlemi bitirebilir, 'oku' diye seslenerek giriş yaptığım notları kontrol edebilirsin.")
+                    textToSpeech("İlk sesi duyduğunda öğrencinin okul numarasını, ikinci sesi duyduğunda notunu okumalısın.")
                         .then(function () {
-                            textToSpeech("Ben hazırım.")
+                            textToSpeech("Örneğin.")
                                 .then(function () {
-                                    textToSpeech("OKU.")
+                                    startSpeechPlay({event: "onended", timeout: 250})
                                         .then(function () {
-                                            resolve();
+                                            textToSpeech("No: 42")
+                                                .then(function () {
+                                                    startSpeechPlay({event: "onended", timeout: 250})
+                                                        .then(function () {
+                                                            textToSpeech("Not: 100", {endCallbackTimeout: 250})
+                                                                .then(function () {
+                                                                    textToSpeech("Not girişi tamamlandığında bana 'tamam' diye seslenerek işlemi bitirebilir, 'oku' diye seslenerek giriş yaptığım notları kontrol edebilirsin.")
+                                                                        .then(function () {
+                                                                            textToSpeech("Ben hazırım.")
+                                                                                .then(function () {
+                                                                                    textToSpeech("OKU.")
+                                                                                        .then(function () {
+                                                                                            resolve();
+                                                                                        });
+                                                                                });
+                                                                        });
+                                                                });
+                                                        });
+                                                });
                                         });
                                 });
                         });
@@ -158,821 +183,266 @@ function read(request) {
         });
     }
 
-    function notlariGir() {
+    function enterNotes() {
 
-        speechToText()
-            .then(
-                function (ogrenci) {
+        var operationType;
 
-                    var studentNum = ogrenci;
+        speechToText({
+            startSpeechSoundFunc: startSpeechPlay
+        }).then(
+            function (speechText) {
 
-                    if (ogrenci && ogrenci.includes("oku")) {
-                        ogrenci = "oku";
-                    } else if (ogrenci && ogrenci.includes("tamam")) {
-                        ogrenci = "tamam";
-                    } else {
-                        ogrenci = speechNumberNormalize(ogrenci, null);
-                    }
+                operationType = speechText.getOperationType();
 
-                    if (ogrenci === "oku") {
+                switch (operationType) {
 
-                        chrome.runtime.sendMessage({type: "analytics", category: "ReadEnd", transaction: "read end"});
-                        chrome.runtime.sendMessage({
-                            type: "analytics",
-                            category: "CheckStart",
-                            transaction: "check start"
-                        });
+                    case OperationType.Unknown:
+                        unknown();
+                        break;
 
-                        request.notGirisAlaniKontrol = notGirisAlaniKontrol;
-                        request.notAlaniKontrol = notAlaniKontrol;
+                    case OperationType.FindStudentEnterNote:
+                        findStudentEnterNote(speechText);
+                        break;
 
-                        check(request);
+                    case OperationType.FindStudent:
+                        findStudent(speechText);
+                        break;
 
-                    } else if (ogrenci === "tamam") {
+                    case OperationType.EnterNote:
+                        enterNote(speechText);
+                        break;
 
-                        chrome.runtime.sendMessage({type: "analytics", category: "ReadEnd", transaction: "read end"});
+                    case OperationType.CheckNotes:
+                        checkNotes();
+                        break;
 
-                        focus(guvenlikKodu.el);
-
-                        noteEntryComplete();
-                        textToSpeech("Teşekkür ederim.")
-                            .then(function () {
-                                textToSpeech("Listeyi kaydedebilirsin.")
-                                    .then(function () {
-                                        textToSpeech("Benimle çalışmanktan memnunsan, daha fazla öğretmenimize yardım edebilmem için destek olabilir misin?")
-                                            .then(function () {
-                                                textToSpeech("Yorum ve paylaşımlarınla öneride bulunabilirsin.")
-                                            })
-                                    })
-                            })
-
-                    } else if (ogrenci && !notAlani.dic.hasOwnProperty(ogrenci)) {
-
-                        blur();
-
-                        numberToSpeech(speakNumberNormalize(ogrenci.toString()), {call: doNotUnderstand})
-                            .then(function () {
-                                textToSpeech(" numaralı öğrenciyi bulamadım. Kontrol edebilir misin?")
-                                    .then(function () {
-                                        textToSpeech("Seni dinliyorum?")
-                                            .then(function () {
-                                                notlariGir();
-                                            });
-                                    });
-                            });
-
-                    } else if (ogrenci && notAlani.dic.hasOwnProperty(ogrenci) && notAlani.dic[ogrenci].isDis) {
-
-                        blur();
-
-                        numberToSpeech(speakNumberNormalize(ogrenci.toString()), {call: doNotUnderstand})
-                            .then(function () {
-                                textToSpeech(" numaralı öğrenci için not alanı kapalı. Kontrol edebilir misin?")
-                                    .then(function () {
-                                        textToSpeech("Seni dinliyorum?")
-                                            .then(function () {
-                                                notlariGir();
-                                            });
-                                    });
-                            });
-
-                    } else if (ogrenci && notAlani.dic.hasOwnProperty(ogrenci)) {
-
-                        speechToText(
-                            {
-                                startFocusElement: notAlani.dic[ogrenci].el,
-                                startSpeechSound: focusInput
-                            })
-                            .then(
-                                function (text) {
-
-                                    var not = speechNumberNormalize(text, -1);
-
-                                    if ((0 <= not && not <= 100) || not === "G") {
-
-                                        notAlani.dic[ogrenci].el[0].value = not;
-                                        notlariGir();
-                                        addFilledCss(notAlani.dic[ogrenci].el);
-
-                                        notAlaniKontrol.txt.push(ogrenci.toString());
-                                        notAlaniKontrol.inp.push(notAlani.dic[ogrenci].el);
-
-                                    } else {
-
-                                        sendAbnormal(chrome, "student score", "AbnormalStudentScore", text, not);
-
-                                        blur();
-
-                                        textToSpeech(
-                                            "Yanlışmı anladım acaba. Öğrencinin numarasını ve notunu tekrar söylermisin?",
-                                            {
-                                                call: doNotUnderstand
-                                            })
-                                            .then(function () {
-                                                notlariGir();
-                                            });
-
-                                    }
-
-                                },
-                                function () {
-
-                                    blur();
-
-                                    textToSpeech(
-                                        "Anlamadım. Öğrencinin numarasını ve notunu tekrar söylermisin?",
-                                        {
-                                            call: doNotUnderstand
-                                        })
-                                        .then(function () {
-                                            notlariGir();
-                                        });
-
-                                }
-                            );
-
-                    } else {
-
-                        sendAbnormal(chrome, "student number", "AbnormalStudentNumber", studentNum, ogrenci);
-
-                        blur();
-
-                        textToSpeech(
-                            "Yanlışmı anladım acaba. Tekrar söylermisin?",
-                            {
-                                call: doNotUnderstand
-                            })
-                            .then(function () {
-                                notlariGir();
-                            });
-
-                    }
-
-
-                },
-                function () {
-
-                    blur();
-
-                    textToSpeech(
-                        "Anlamadım. Tekrar söylermisin?",
-                        {
-                            call: doNotUnderstand
-                        })
-                        .then(function () {
-                            notlariGir();
-                        });
+                    case OperationType.Complete:
+                        complete();
+                        break;
 
                 }
-            );
+
+            }
+        );
+    }
+
+    function unknown() {
+
+        blur();
+
+        textToSpeech(
+            "Anlamadım. Tekrar söylermisin?",
+            {
+                call: doNotUnderstandPlay
+            })
+            .then(function () {
+                enterNotes();
+            });
 
     }
 
-    bilgilendir()
-        .then(function () {
-            notlariGir();
-        });
+    function findStudentEnterNote(speechText = '') {
 
-    function focus(input) {
+        var noteInfo = speechText.getNoteInfo();
 
-        if (input) {
-            input.focus();
+        if (notAlani.dic.hasOwnProperty(noteInfo.no)) {
+
+            blinkerAnimate(1)
+                .then(function () {
+
+                    focus(notAlani.dic[noteInfo.no].el);
+
+                    blinkerAnimate(notGirisAlani.idx)
+                        .then(function () {
+
+                            if ((0 <= noteInfo.note && noteInfo.note <= 100) || noteInfo.note === "G") {
+
+                                notAlani.dic[noteInfo.no].el[0].value = noteInfo.note;
+
+                                addFilledCss(notAlani.dic[noteInfo.no].el);
+
+                                if (!notAlaniKontrol.txt.includes(noteInfo.no.toString())) {
+                                    notAlaniKontrol.txt.push(noteInfo.no.toString());
+                                    notAlaniKontrol.inp.push(notAlani.dic[noteInfo.no].el);
+                                }
+
+                                writeTextPlay()
+                                    .then(function () {
+                                        enterNotes();
+                                    });
+
+                            } else {
+
+                                sendAbnormalNumber("AbnormalStudentScore", speechText, noteInfo.note);
+
+                                blur();
+
+                                textToSpeech(
+                                    "Yanlışmı anladım acaba. Öğrencinin notunu tekrar söylermisin?",
+                                    {
+                                        call: doNotUnderstandPlay
+                                    })
+                                    .then(function () {
+                                        enterNotes();
+                                    });
+
+                            }
+
+                        });
+                });
+
+        } else {
+
+            blur();
+
+            numberToSpeech(speakNumberNormalize(noteInfo.no.toString()), {call: doNotUnderstandPlay})
+                .then(function () {
+                    textToSpeech(" numaralı öğrenciyi bulamadım. Kontrol edebilir misin?")
+                        .then(function () {
+                            textToSpeech("Seni dinliyorum?")
+                                .then(function () {
+                                    enterNotes();
+                                });
+                        });
+                });
+
+        }
+    }
+
+    function findStudent(speechText = '') {
+
+        var noteInfo = speechText.getNoteInfo();
+
+        if (notAlani.dic.hasOwnProperty(noteInfo.no)) {
+
+            blinkerAnimate(1)
+                .then(function () {
+
+                    lastFoundStudentNo = noteInfo.no;
+
+                    focus(notAlani.dic[noteInfo.no].el);
+
+                    enterNotes();
+
+                })
+
+        } else {
+
+            blur();
+
+            numberToSpeech(speakNumberNormalize(noteInfo.no.toString()), {call: doNotUnderstandPlay})
+                .then(function () {
+                    textToSpeech(" numaralı öğrenciyi bulamadım. Kontrol edebilir misin?")
+                        .then(function () {
+                            textToSpeech("Seni dinliyorum?")
+                                .then(function () {
+                                    enterNotes();
+                                });
+                        });
+                });
+
         }
 
     }
 
-    function blur() {
+    function enterNote(speechText = '') {
 
-        document.activeElement.blur();
+        var noteInfo = {};
+
+        noteInfo.no = lastFoundStudentNo;
+        noteInfo.note = speechText.getNoteInfo().note;
+
+        if (noteInfo.no && (0 <= noteInfo.note && noteInfo.note <= 100) || noteInfo.note === "G") {
+
+            blinkerAnimate(notGirisAlani.idx)
+                .then(function () {
+
+                    notAlani.dic[noteInfo.no].el[0].value = noteInfo.note;
+
+                    addFilledCss(notAlani.dic[noteInfo.no].el);
+
+                    if (!notAlaniKontrol.txt.includes(noteInfo.no.toString())) {
+                        notAlaniKontrol.txt.push(noteInfo.no.toString());
+                        notAlaniKontrol.inp.push(notAlani.dic[noteInfo.no].el);
+                    }
+
+                    writeTextPlay()
+                        .then(function () {
+                            enterNotes();
+                        });
+
+                })
+
+        } else if (!noteInfo.no) {
+
+            blur();
+
+            textToSpeech(
+                "Önce öğrencinin numarasını söylemelisin.",
+                {
+                    call: doNotUnderstandPlay
+                })
+                .then(function () {
+                    textToSpeech("Seni dinliyorum?")
+                        .then(function () {
+                            enterNotes();
+                        });
+                });
+
+        } else {
+
+            sendAbnormalNumber("AbnormalStudentScore", speechText, noteInfo.note);
+
+            blur();
+
+            textToSpeech(
+                "Yanlışmı anladım acaba. Öğrencinin notunu tekrar söylermisin?",
+                {
+                    call: doNotUnderstandPlay
+                })
+                .then(function () {
+                    enterNotes();
+                });
+
+        }
 
     }
 
-    //region read >> sırasi ile oku
+    function checkNotes() {
 
-    // function bilgilendir() {
-    //
-    //     var resolve, reject;
-    //
-    //     if (notGirisAlani.idx <= 0 || notAlani.el.length <= 0) {
-    //
-    //         textToSpeech(
-    //             "Not giriş alanı açık değil.",
-    //             {
-    //                 call: doNotUnderstand,
-    //                 rate: 1.1
-    //             })
-    //             .then(function () {
-    //                 textToSpeech("Lütfen giriş yapmak istediğiniz alanı seçerek sınıfı listeleyiniz.", {rate: 1.1})
-    //                     .then(function () {
-    //                         reject();
-    //                     });
-    //             });
-    //
-    //     } else {
-    //
-    //         textToSpeech("Ben öğrencinin okul numarasını okuyacağım sen notunu. Giriş yapmayacağın öğrenci için bana 'geç' diye seslenebilirsin.", {rate: 1.1})
-    //             .then(function () {
-    //                 resolve();
-    //             });
-    //
-    //     }
-    //
-    //     return new Promise(function (resolveFunc, rejectFunc) {
-    //         resolve = resolveFunc;
-    //         reject = rejectFunc;
-    //     });
-    // }
-    //
-    // function notlariGir(index) {
-    //
-    //     if (index === notAlani.inp.length) {
-    //
-    //         $(notAlani.inp[index]).blur();
-    //
-    //         noteEntryComplete();
-    //         textToSpeech("Not girişi tamamlandı. Listeyi kontrol edebilir veya kaydedebilirsiniz.", {rate: 1});
-    //
-    //     } else if (!$(notAlani.inp[index]).is(':disabled')) {
-    //
-    //         textToSpeech(notAlani.txt[index], {rate: 1})
-    //             .then(function () {
-    //
-    //                 speechToText({el: $(notAlani.inp[index]), call: "focus"})
-    //                     .then(
-    //                         function (text) {
-    //
-    //                             var not;
-    //
-    //                             if (text.includes("geç")) {
-    //                                 not = "geç";
-    //                             } else if (text && text.length > 0 && text.includes(' ')) {
-    //                                 text = text.split(' ')[1].trim();
-    //                             }
-    //
-    //                             if (text && 0 < text.length && text.length < 4 && !not) {
-    //
-    //                                 switch (text) {
-    //                                     case "sıfır":
-    //                                         text = "0";
-    //                                         break;
-    //                                     case "bir":
-    //                                         text = "1";
-    //                                         break;
-    //                                     case "yüz":
-    //                                         text = "100";
-    //                                         break;
-    //                                 }
-    //
-    //                                 not = !isNaN(parseInt(text)) ? parseInt(text) : -1;
-    //                             }
-    //
-    //
-    //                             if (not === "geç") {
-    //
-    //                                 notlariGir(++index);
-    //                                 addBlankCss($(notAlani.inp[index - 1]));
-    //
-    //                             } else if (0 <= not && not <= 100) {
-    //
-    //                                 notAlani.inp[index].value = not;
-    //                                 notlariGir(++index);
-    //                                 addFilledCss($(notAlani.inp[index - 1]));
-    //
-    //                             } else {
-    //
-    //                                 $(notAlani.inp[index]).blur();
-    //
-    //                                 textToSpeech(
-    //                                     "Yanlışmı anladım acaba. Tekrar söylermisin?",
-    //                                     {
-    //                                         call: doNotUnderstand,
-    //                                         rate: 1
-    //                                     })
-    //                                     .then(function () {
-    //                                         notlariGir(index);
-    //                                     });
-    //
-    //                             }
-    //
-    //                         },
-    //                         function () {
-    //
-    //                             $(notAlani.inp[index]).blur();
-    //
-    //                             textToSpeech(
-    //                                 "Anlamadım. Tekrar söylermisin?",
-    //                                 {
-    //                                     call: doNotUnderstand,
-    //                                     rate: 1
-    //                                 })
-    //                                 .then(function () {
-    //                                     notlariGir(index);
-    //                                 });
-    //
-    //                         }
-    //                     );
-    //
-    //             });
-    //
-    //     } else {
-    //
-    //         $(notAlani.inp[index]).blur();
-    //
-    //         textToSpeech(
-    //             "Alan kapalı. " + notAlani.txt[index] + " numaralı öğrenciyi geçiyorum.",
-    //             {
-    //                 call: doNotUnderstand,
-    //                 rate: 1
-    //             })
-    //             .then(function () {
-    //                 notlariGir(++index);
-    //             });
-    //
-    //     }
-    // }
-    //
-    // bilgilendir()
-    //     .then(function () {
-    //         notlariGir(0);
-    //     });
+        gtag('event', "ReadEnd", {'event': "read end"});
+        gtag('event', "CheckStart", {'event': "check start"});
 
-    //endregion
+        request.notGirisAlaniKontrol = notGirisAlaniKontrol;
+        request.notAlaniKontrol = notAlaniKontrol;
 
-    //region read >> ilk çalışma
+        check(request);
 
-    // TODO: Üzerinde çalışılırsa aktif edilebilir.
-    // TODO: Sınıf, şube ve ders seç, listele işlemlerini içerir.
+    }
 
-    // En tepede tanımlıydı.
-    // var stepEnum = {
-    //     bilgilendir: 1,
-    //     sinifSubeSec: 2,
-    //     dersSec: 3,
-    //     notGirisAlaniSec: 4,
-    //     sinifiListele: 5,
-    //     notlariGir: 6,
-    // };
+    function complete() {
 
-    // En altta tanımlıydı. Sayfa postback olduğunda kaldığı yerden devam etmesi için
-    // (function checkContinue() {
-    //
-    //     storageGet("OKU")
-    //         .then(function (oku) {
-    //
-    //             if (oku && oku.isContinue) {
-    //                 read(oku.request);
-    //             }
-    //
-    //         });
-    //
-    // })();
+        gtag('event', "ReadEnd", {'event': "read end"});
 
-    // onMessage da tanımlıydı
-    // storageClear()
-    //     .then(function () {
-    //         storageSet("OKU", {isContinue: true, request: request})
-    //             .then(function () {
-    //                 read(request);
-    //             })
-    //     });
+        focus(guvenlikKodu.el);
 
-    // var guvenlikKodu = {el: null};
-    // var sinifSube = {el: null, opt: []};
-    // var ders = {el: null, opt: []};
-    // var notGirisAlani = {el: null, cbx: [], idx: -1};
-    // var listele = {el: null};
-    // var notAlani = {el: null, txt: [], inp: []};
-    // var kaydet = {el: null};
-    // var cikis = {el: null};
-    //
-    // if (request.url.includes("IlkOgretim")) {
-    //
-    //     guvenlikKodu.el = $("#Gv_kod1_txtGuvenlikKod");
-    //     sinifSube.el = $("#ddlSinifiSubesi");
-    //     ders.el = $("#ddlDersler");
-    //     notGirisAlani.el = $("#tblKonservatuar");
-    //     listele.el = $("#btnListele");
-    //     notAlani.el = $("#dgListem");
-    //     kaydet.el = $("#IOMToolbarActive1_kaydet_b img");
-    //     cikis.el = $("#IOMToolbarActive1_exit_b a");
-    //
-    //     sinifSube.el
-    //         .find("option")
-    //         .each(function (index, option) {
-    //
-    //             var optionText = $(option).text().split('/');
-    //             var optionVal = $(option).val();
-    //             var sinifNumara = optionText[0].substring(0, optionText[0].indexOf('.')).trim();
-    //             var sinifHarf = optionText[1].trim().substring(0, 1).trim();
-    //
-    //             sinifSube.opt.push(
-    //                 {
-    //                     optText: (sinifNumara + sinifHarf).turkishToUpper(),
-    //                     optValue: optionVal
-    //                 }
-    //             );
-    //
-    //         });
-    //
-    //     ders.el
-    //         .find("option")
-    //         .each(function (index, option) {
-    //             ders.opt.push(
-    //                 {
-    //                     optText: $(option).text().trim().turkishToUpper(),
-    //                     optValue: $(option).val()
-    //                 }
-    //             );
-    //         });
-    //
-    //     notGirisAlani.el
-    //         .find("input")
-    //         .each(function (index, checkbox) {
-    //
-    //             var cbxId = checkbox.id;
-    //             var cbxText = "";
-    //
-    //             if (cbxId.includes("chkS")) {
-    //                 cbxText = cbxId.replace("chkS", "") + ". Sınav"
-    //             } else if (cbxId.includes("chkPRJ")) {
-    //                 cbxText = cbxId.replace("chkPRJ", "") + ". Proje"
-    //             } else if (cbxId.includes("chkPRF")) {
-    //                 cbxText = cbxId.replace("chkPRF", "") + ". Etkinlik"
-    //             }
-    //
-    //             notGirisAlani.cbx.push(
-    //                 {
-    //                     el: checkbox,
-    //                     txt: cbxText.turkishToUpper(),
-    //                     idx: index
-    //                 }
-    //             );
-    //
-    //         });
-    //
-    //     storageGet("noteInputField")
-    //         .then(function (noteInputField) {
-    //
-    //             if (noteInputField >= 0) {
-    //
-    //                 notAlani.el
-    //                     .find("tbody tr td:first-child")
-    //                     .each(function (index, td) {
-    //                         if (index > 0)
-    //                             notAlani.txt.push(td.innerText);
-    //                     });
-    //
-    //                 notAlani.el
-    //                     .find("tbody tr td:nth-child(" + (noteInputField + 3) + ") input")
-    //                     .each(function (index, input) {
-    //                         notAlani.inp.push(input);
-    //                     });
-    //
-    //             }
-    //
-    //         });
-    //
-    // } else if (request.url.includes("OrtaOgretim")) {
-    // }
-    //
-    // bilgilendir()
-    //     .then(function () {
-    //
-    //         sinifSubeSec("Sınıf ve şube.")
-    //             .then(function () {
-    //
-    //                 dersSec("Ders.")
-    //                     .then(function () {
-    //
-    //                         notGirisAlaniSec("Not giriş alanı.")
-    //                             .then(function () {
-    //
-    //                                 sinifiListele()
-    //                                     .then(function () {
-    //
-    //                                         notlariGir(0)
-    //                                             .then(function () {
-    //
-    //                                             });
-    //
-    //                                     });
-    //
-    //                             });
-    //
-    //                     });
-    //
-    //             });
-    //
-    //     });
-    //
-    // function bilgilendir() {
-    //
-    //     var resolve, reject;
-    //
-    //     storageGet("step")
-    //         .then(function (step) {
-    //
-    //             if (!step) {
-    //                 textToSpeech("Öncelikle sınıf, şube, ders ve not giriş alanı bilgilerini isteyeceğim. Daha sonra ben öğrencinin okul numarasını okuyacağım sen notunu. Eğer okuduğumu anlamazsan 'tekrar' diye bana seslenebilirsin.", {rate: 1.1})
-    //                     .then(function () {
-    //                         storageSet("step", stepEnum.bilgilendir)
-    //                             .then(function () {
-    //                                 resolve();
-    //                             });
-    //                     });
-    //             } else {
-    //                 setTimeout(resolve);
-    //             }
-    //
-    //         });
-    //
-    //     return new Promise(function (resolveFunc, rejectFunc) {
-    //         resolve = resolveFunc;
-    //         reject = rejectFunc;
-    //     });
-    // }
-    //
-    // function sinifSubeSec(text) {
-    //
-    //     var resolve, reject;
-    //
-    //     // TODO: resolve leri kontrol et. Postback olduğu için gerek kalmadı gibi local storage dan kaldığımız yeri yöneteceğiz.
-    //     // TODO: her işlemde anahtar kelime kontrolü. sınıf seçemedi ise devam et derse atlasın veya geç desin. sınıf kombosu heryerde farklı olabilir.
-    //
-    //     //TODO: ortak kontrol metodu yaz. adımları kontrol etsin. liste varsa ilk adımları atlasın notları okumaya başlasın.
-    //
-    //     storageGet("step")
-    //         .then(function (step) {
-    //             if (step < stepEnum.sinifSubeSec) {
-    //
-    //                 textToSpeech(text, {rate: 1})
-    //                     .then(function () {
-    //
-    //                         speechToText()
-    //                             .then(
-    //                                 function (text) {
-    //
-    //                                     var sinifNumara, sinifHarf, sinifHarfNumara;
-    //
-    //                                     if (text && text.length >= 2) {
-    //                                         sinifHarf = text.substring(text.length - 1);
-    //                                         sinifNumara = text.replace(sinifHarf, '');
-    //                                     } else if (text && text.length === 1) {
-    //                                         sinifHarf = "";
-    //                                         sinifNumara = text;
-    //                                     }
-    //
-    //                                     sinifHarfNumara = (sinifNumara + sinifHarf).trim().turkishToUpper();
-    //
-    //                                     if (sinifHarfNumara) {
-    //
-    //                                         sinifSube.opt.forEach(function (option, index) {
-    //
-    //                                             if (sinifHarfNumara === option.optText) {
-    //                                                 sinifSube.el.val(option.optValue);
-    //                                                 storageSet("step", stepEnum.sinifSubeSec)
-    //                                                     .then(function () {
-    //                                                         __doPostBack('ddlSinifiSubesi', '');
-    //                                                         resolve();
-    //                                                     });
-    //                                             }
-    //
-    //                                         })
-    //
-    //                                     }
-    //
-    //                                     sinifSubeSec("Bulamadım. Yanlışmı anladım acaba. Örneğin 5A, 7B şeklinde tekrar söylermisin?")
-    //
-    //                                 },
-    //                                 function () {
-    //
-    //                                     sinifSubeSec("Anlamadım. Tekrar söylermisin?")
-    //
-    //                                 }
-    //                             )
-    //
-    //                     });
-    //
-    //             } else {
-    //                 setTimeout(resolve);
-    //             }
-    //         });
-    //
-    //     return new Promise(function (resolveFunc, rejectFunc) {
-    //         resolve = resolveFunc;
-    //         reject = rejectFunc;
-    //     });
-    // }
-    //
-    // function dersSec(text) {
-    //
-    //     var resolve, reject;
-    //
-    //     // TODO: resolve leri kontrol et. Postback olduğu için gerek kalmadı gibi local storage dan kaldığımız yeri yöneteceğiz.
-    //     // TODO: her işlemde anahtar kelime kontrolü. sınıf seçemedi ise devam et derse atlasın veya geç desin. sınıf kombosu heryerde farklı olabilir.
-    //
-    //     storageGet("step")
-    //         .then(function (step) {
-    //             if (step < stepEnum.dersSec) {
-    //
-    //                 textToSpeech(text, {rate: 1})
-    //                     .then(function () {
-    //
-    //                         speechToText()
-    //                             .then(
-    //                                 function (text) {
-    //
-    //                                     if (text && text.length > 0) {
-    //
-    //                                         ders.opt.forEach(function (option, index) {
-    //
-    //                                             if (option.optText.includes(text.turkishToUpper())) {
-    //                                                 ders.el.val(option.optValue);
-    //                                                 storageSet("step", stepEnum.dersSec)
-    //                                                     .then(function () {
-    //                                                         resolve();
-    //                                                     });
-    //                                             }
-    //
-    //                                         })
-    //
-    //                                     }
-    //
-    //                                     dersSec("Bulamadım. Yanlışmı anladım acaba. Örneğin Kur'ân-ı Kerim, Arapça şeklinde tekrar söylermisin?")
-    //
-    //                                 },
-    //                                 function () {
-    //
-    //                                     dersSec("Anlamadım. Tekrar söylermisin?")
-    //
-    //                                 }
-    //                             )
-    //
-    //                     });
-    //
-    //             } else {
-    //                 setTimeout(resolve);
-    //             }
-    //         });
-    //
-    //     return new Promise(function (resolveFunc, rejectFunc) {
-    //         resolve = resolveFunc;
-    //         reject = rejectFunc;
-    //     });
-    // }
-    //
-    // function notGirisAlaniSec(text) {
-    //
-    //     var resolve, reject;
-    //
-    //     // TODO: resolve leri kontrol et. Postback olduğu için gerek kalmadı gibi local storage dan kaldığımız yeri yöneteceğiz.
-    //     // TODO: her işlemde anahtar kelime kontrolü. sınıf seçemedi ise devam et derse atlasın veya geç desin. sınıf kombosu heryerde farklı olabilir.
-    //
-    //     storageGet("step")
-    //         .then(function (step) {
-    //             if (step < stepEnum.notGirisAlaniSec) {
-    //
-    //                 textToSpeech(text, {rate: 1})
-    //                     .then(function () {
-    //
-    //                         speechToText()
-    //                             .then(
-    //                                 function (text) {
-    //
-    //                                     if (text && text.length > 0) {
-    //
-    //                                         notGirisAlani.cbx.forEach(function (checkbox, index) {
-    //
-    //                                             if (checkbox.txt.includes(text.turkishToUpper())) {
-    //
-    //                                                 checkbox.el.checked = true;
-    //                                                 notGirisAlani.idx = checkbox.idx;
-    //
-    //                                                 storageSet("noteInputField", checkbox.idx)
-    //                                                     .then(function () {
-    //
-    //                                                         storageSet("step", stepEnum.notGirisAlaniSec)
-    //                                                             .then(function () {
-    //                                                                 resolve();
-    //                                                             });
-    //
-    //                                                     });
-    //
-    //                                             }
-    //
-    //                                         })
-    //
-    //                                     }
-    //
-    //                                     notGirisAlaniSec("Bulamadım. Yanlışmı anladım acaba. Örneğin 1. sınav, 2. proje, 3.etkinlik şeklinde tekrar söylermisin?")
-    //
-    //                                 },
-    //                                 function () {
-    //
-    //                                     notGirisAlaniSec("Anlamadım. Tekrar söylermisin?")
-    //
-    //                                 }
-    //                             )
-    //
-    //                     });
-    //
-    //             } else {
-    //                 setTimeout(resolve);
-    //             }
-    //         });
-    //
-    //     return new Promise(function (resolveFunc, rejectFunc) {
-    //         resolve = resolveFunc;
-    //         reject = rejectFunc;
-    //     });
-    // }
-    //
-    // function sinifiListele() {
-    //
-    //     var resolve, reject;
-    //
-    //     storageGet("step")
-    //         .then(function (step) {
-    //
-    //             if (step < stepEnum.sinifiListele) {
-    //
-    //                 storageSet("step", stepEnum.sinifiListele)
-    //                     .then(function () {
-    //                         listele.el.click();
-    //                     });
-    //
-    //             } else {
-    //                 resolve();
-    //             }
-    //
-    //         });
-    //
-    //     return new Promise(function (resolveFunc, rejectFunc) {
-    //         resolve = resolveFunc;
-    //         reject = rejectFunc;
-    //     });
-    // }
-    //
-    // function notlariGir(index) {
-    //
-    //     var resolve, reject;
-    //
-    //     storageGet("step")
-    //         .then(function (step) {
-    //             if (step < stepEnum.notlariGir && index < notAlani.txt.length) {
-    //
-    //                 textToSpeech(notAlani.txt[index], {rate: 1})
-    //                     .then(function () {
-    //
-    //                         speechToText()
-    //                             .then(
-    //                                 function (text) {
-    //
-    //                                     var not = text && 0 < text.length && text.length < 4 && !isNaN(parseInt(text)) ? parseInt(text) : -1;
-    //
-    //                                     if (0 <= not && not <= 100) {
-    //
-    //                                         notAlani.inp[index].value = text;
-    //
-    //                                         if (index + 1 === notAlani.inp.length) {
-    //                                             storageSet("step", stepEnum.notlariGir)
-    //                                                 .then(function () {
-    //                                                     resolve();
-    //                                                 });
-    //                                         } else {
-    //                                             notlariGir(++index)
-    //                                         }
-    //
-    //                                     }
-    //
-    //                                     textToSpeech("Yanlışmı anladım acaba. Tekrar söylermisin?", {rate: 1})
-    //                                         .then(function () {
-    //                                             notlariGir(index);
-    //                                         });
-    //
-    //                                 },
-    //                                 function () {
-    //
-    //                                     textToSpeech("Anlamadım. Tekrar söylermisin?", {rate: 1})
-    //                                         .then(function () {
-    //                                             notlariGir(index);
-    //                                         });
-    //
-    //                                 }
-    //                             )
-    //
-    //                     });
-    //
-    //             }
-    //         });
-    //
-    //     return new Promise(function (resolveFunc, rejectFunc) {
-    //         resolve = resolveFunc;
-    //         reject = rejectFunc;
-    //     });
-    // }
+        noteEntryCompletePlay();
+        textToSpeech("Teşekkür ederim.")
+            .then(function () {
+                textToSpeech("Listeyi kaydedebilirsin.")
+                    .then(function () {
+                        textToSpeech("Benimle çalışmanktan memnunsan, daha fazla öğretmenimize yardım edebilmem için destek olabilir misin?")
+                            .then(function () {
+                                textToSpeech("Yorum ve paylaşımlarınla öneride bulunabilirsin.")
+                            })
+                    })
+            })
+    }
 
-    //endregion
+    inform()
+        .then(function () {
+            enterNotes();
+        });
 }
 
 function download(request, sendResponse) {
@@ -1292,7 +762,7 @@ function check(request) {
 
     })();
 
-    function bilgilendir() {
+    function inform() {
 
         var resolve, reject;
 
@@ -1301,7 +771,7 @@ function check(request) {
             textToSpeech(
                 "Not giriş alanı açık değil.",
                 {
-                    call: doNotUnderstand
+                    call: doNotUnderstandPlay
                 })
                 .then(function () {
                     textToSpeech("Lütfen kontrol etmek istediğiniz alanı seçerek sınıfı listeleyiniz.")
@@ -1341,15 +811,15 @@ function check(request) {
         });
     }
 
-    function notlariOku(index) {
+    function readNote(index) {
 
         if (index === notAlani.inp.length) {
 
-            chrome.runtime.sendMessage({type: "analytics", category: "CheckEnd", transaction: "check end"});
+            gtag('event', "CheckEnd", {'event': "check end"});
 
             focus(guvenlikKodu.el);
 
-            noteEntryComplete();
+            noteEntryCompletePlay();
             textToSpeech("Bitti. Bu kadar.")
                 .then(function () {
                     textToSpeech("Benimle çalışmanktan memnunsan, daha fazla öğretmenimize yardım edebilmem için destek olabilir misin?")
@@ -1362,7 +832,7 @@ function check(request) {
 
             focus(notAlani.inp[index]);
 
-            focusInput()
+            writeTextPlay()
                 .then(function () {
 
                     numberToSpeech(speakNumberNormalize(notAlani.txt[index]), {rate: 1})
@@ -1375,9 +845,13 @@ function check(request) {
                             numberToSpeech(speakNumberNormalize(not), {rate: 1})
                                 .then(function () {
 
-                                    notlariOku(++index);
+                                    setTimeout(function () {
 
-                                    not === "Boş." ? addBlankCss($(notAlani.inp[index - 1])) : addFilledCss($(notAlani.inp[index - 1]));
+                                        readNote(++index);
+
+                                        not === "Boş." ? addBlankCss($(notAlani.inp[index - 1])) : addFilledCss($(notAlani.inp[index - 1]));
+
+                                    }, 500);
 
                                 });
 
@@ -1389,24 +863,10 @@ function check(request) {
 
     }
 
-    bilgilendir()
+    inform()
         .then(function () {
-            notlariOku(0);
+            readNote(0);
         });
-
-    function focus(input) {
-
-        if (input) {
-            input.focus();
-        }
-
-    }
-
-    function blur() {
-
-        document.activeElement.blur();
-
-    }
 
 }
 
@@ -1428,11 +888,7 @@ function check(request) {
 
             SocialShareBtnFacebook.addEventListener("click", function () {
 
-                chrome.runtime.sendMessage({
-                    type: "analytics",
-                    category: "ShareOnFacebook",
-                    transaction: "share on facebook"
-                });
+                gtag('event', "ShareOnFacebook", {'event': "share on facebook"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -1443,11 +899,7 @@ function check(request) {
 
             SocialShareBtnTwitter.addEventListener("click", function () {
 
-                chrome.runtime.sendMessage({
-                    type: "analytics",
-                    category: "ShareOnTwitter",
-                    transaction: "share on twitter"
-                });
+                gtag('event', "ShareOnTwitter", {'event': "share on twitter"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -1458,11 +910,7 @@ function check(request) {
 
             SocialShareBtnYoutube.addEventListener("click", function () {
 
-                chrome.runtime.sendMessage({
-                    type: "analytics",
-                    category: "ShareOnYoutube",
-                    transaction: "share on youtube"
-                });
+                gtag('event', "ShareOnYoutube", {'event': "share on youtube"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -1473,11 +921,7 @@ function check(request) {
 
             SocialShareBtnLinkedin.addEventListener("click", function () {
 
-                chrome.runtime.sendMessage({
-                    type: "analytics",
-                    category: "ShareOnLinkedin",
-                    transaction: "share on linkedin"
-                });
+                gtag('event', "ShareOnLinkedin", {'event': "share on linkedin"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -1488,11 +932,7 @@ function check(request) {
 
             SocialShareBtnGoogle.addEventListener("click", function () {
 
-                chrome.runtime.sendMessage({
-                    type: "analytics",
-                    category: "ShareOnGoogleStore",
-                    transaction: "share on google store"
-                });
+                gtag('event', "ShareOnGoogleStore", {'event': "share on google store"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {

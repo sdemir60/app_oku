@@ -35,3 +35,23 @@ function clearInputCss() {
     inputs.removeClass("input-grade-blank input-grade-filled");
 
 }
+
+function blinkerAnimate(tdIndex) {
+
+    var columns;
+    var resolve, reject;
+
+    columns = $("#dgListem tbody tr td:nth-child(" + tdIndex + ")");
+
+    columns.addClass("blinker");
+
+    setTimeout(function () {
+        resolve();
+        columns.removeClass("blinker")
+    }, 150);
+
+    return new Promise(function (resolveFunc, rejectFunc) {
+        resolve = resolveFunc;
+        reject = rejectFunc;
+    });
+}

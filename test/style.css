@@ -1,0 +1,62 @@
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+}
+
+.container {
+    width: calc(100% - 100px);
+    height: calc(100% - 100px);
+    padding: 50px;
+}
+
+.container > .text {
+    width: 100%;
+    height: calc(100% - 25px);
+}
+
+.container > .text > input {
+    width: calc(100% - 8px);
+    height: 50px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 17px;
+    font-family: monospace;
+    letter-spacing: 2px;
+}
+
+.container > .text > input#test {
+    color: #e10000;
+    margin-top: 10px;
+    border-color: #e10000;
+    border-style: solid;
+}
+
+.container > .text > input#test:focus-visible {
+    outline: inherit;
+}
+
+.container > .text > textarea {
+    width: calc(100% - 32px);
+    height: calc(100% - 173px);
+    padding: 15px;
+    margin-top: 10px;
+    font-size: 25px;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+.container > .buttons {
+    width: 100%;
+    height: 25px;
+    text-align: right;
+}
+
+.container > .buttons > button {
+    padding: 5px 10px 5px 10px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-weight: 600;
+}

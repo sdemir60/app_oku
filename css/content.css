@@ -1,3 +1,6 @@
+input.oku-input-grade {
+    outline: none !important;
+}
 
 input:read-only.oku-input-grade,
 input[disabled="disabled"].oku-input-grade {
@@ -36,5 +39,27 @@ input[disabled="disabled"].oku-input-grade {
     }
     100% {
         box-shadow: 0 0 0 0 rgba(28, 150, 0, 0);
+    }
+}
+
+.blinker {
+    animation: blinker .15s linear;
+}
+
+@keyframes blinker {
+    0% {
+        opacity: 1;
+    }
+    10% {
+        opacity: 0;
+    }
+    40% {
+        opacity: 1;
+    }
+    70% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
     }
 }

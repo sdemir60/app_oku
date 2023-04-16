@@ -1,22 +1,3 @@
-//region Background >> Google Analytics
-
-var _AnalyticsCode = 'UA-78480732-2';
-var _gaq = _gaq || [];
-
-_gaq.push(['_setAccount', _AnalyticsCode]);
-_gaq.push(['_trackPageview']);
-
-(function () {
-    var ga = document.createElement('script');
-    ga.type = 'text/javascript';
-    ga.async = true;
-    ga.src = 'https://ssl.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(ga, s);
-})();
-
-//endregion
-
 //region Background >> Function
 
 Date.prototype.getShortDate = function () {
@@ -36,22 +17,43 @@ function createNotification() {
 
     var dateTimeNow = (new Date()).getShortDate();
 
-    if (localStorage.initializedDate !== dateTimeNow) {
+    chrome.storage.local.get("initializedDate")
+        .then(function (data) {
 
-        localStorage.initializedDate = dateTimeNow;
+            if (data && data.initializedDate !== dateTimeNow) {
 
-        var notification = new Notification("OKU", {
-            icon: 'img/OKU128.png',
-            body: 'e-Okul sesli ders notu girişi. Öğretmenlerimiz "hızlı not girişi" ekranından, hızlı not girebilsin diye...'
+                chrome.storage.local.set({initializedDate: dateTimeNow});
+
+                chrome.notifications.create('', {
+                    type: 'basic',
+                    requireInteraction: true,
+                    iconUrl: '/img/OKU128.png',
+                    title: 'OKU',
+                    message: 'Öğretmenlerimiz "hızlı not girişi" ekranından, hızlı not girebilsin diye...',
+                });
+
+                chrome.notifications.create('', {
+                    type: 'basic',
+                    requireInteraction: true,
+                    iconUrl: '/img/OKU128.png',
+                    title: 'OKU',
+                    message: 'Seni daha iyi anlamak için her gün yeni şeyler öğreniyorum.',
+                });
+
+                chrome.notifications.onClicked.addListener(
+                    function () {
+                        chrome.tabs.sendMessage(tabs[0].id, {
+                            command: "analytics",
+                            category: "Notification",
+                            transaction: "notification clicked"
+                        });
+                        chrome.tabs.create({url: 'https://www.youtube.com/watch?v=r_Ex-PKJ-P4&feature=emb_title'});
+                    }
+                )
+
+            }
+
         });
-
-        notification.onclick = function(){
-            chrome.tabs.create({url: 'https://www.youtube.com/watch?v=r_Ex-PKJ-P4&feature=emb_title'});
-            _gaq.push(['_trackEvent', "Notification", 'notification clicked']);
-        };
-
-    }
-
 }
 
 //endregion
@@ -64,9 +66,10 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
         createNotification();
 
-        chrome.tabs.executeScript(tabId, {file: "js/xlsx.full.min.js"}, function () {
-            chrome.tabs.executeScript(tabId, {file: "js/script.js"})
-        })
+        chrome.scripting.executeScript({
+            target: {tabId: tabId},
+            files: ["js/xlsx.full.min.js", "js/script.js"]
+        });
 
     }
 
@@ -83,37 +86,61 @@ chrome.commands.onCommand.addListener(function (command) {
     switch (command) {
         case "tanitim":
             chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                _gaq.push(['_trackEvent', "TutorialCommand", 'tutorial command']);
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    command: "analytics",
+                    category: "TutorialCommand",
+                    transaction: "tutorial command"
+                });
                 chrome.tabs.create({url: "https://youtu.be/Er3Ha68K8nQ"});
             });
             break;
         case "yardim":
             chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                _gaq.push(['_trackEvent', "HelpCommand", 'help command']);
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    command: "analytics",
+                    category: "HelpCommand",
+                    transaction: "help command"
+                });
                 chrome.tabs.create({url: "doc/help.pdf"});
             });
             break;
         case "oku":
             chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                _gaq.push(['_trackEvent', "ReadCommand", 'read command']);
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    command: "analytics",
+                    category: "ReadCommand",
+                    transaction: "read command"
+                });
                 chrome.tabs.sendMessage(tabs[0].id, {command: "oku", url: tabs[0].url});
             });
             break;
         case "indir":
             chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                _gaq.push(['_trackEvent', "DownloadCommand", 'download command']);
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    command: "analytics",
+                    category: "DownloadCommand",
+                    transaction: "download command"
+                });
                 chrome.tabs.sendMessage(tabs[0].id, {command: "indir", url: tabs[0].url});
             });
             break;
         case "yukle":
             chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                _gaq.push(['_trackEvent', "UploadCommand", 'upload command']);
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    command: "analytics",
+                    category: "UploadCommand",
+                    transaction: "upload command"
+                });
                 chrome.tabs.sendMessage(tabs[0].id, {command: "yukle", url: tabs[0].url});
             });
             break;
         case "kontrol":
             chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                _gaq.push(['_trackEvent', "CheckCommand", 'check command']);
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    command: "analytics",
+                    category: "CheckCommand",
+                    transaction: "check command"
+                });
                 chrome.tabs.sendMessage(tabs[0].id, {command: "kontrol", url: tabs[0].url});
             });
             break;
@@ -122,20 +149,3 @@ chrome.commands.onCommand.addListener(function (command) {
 });
 
 //endregion
-
-//region Background >> Runtime >> onMessage
-
-chrome.runtime.onMessage.addListener(function (message) {
-
-    if (message.type === "analytics") {
-        _gaq.push(['_trackEvent', message.category, message.transaction]);
-    }
-
-});
-
-//endregion
-
-// chrome.runtime.onMessage.addListener(function (message) {
-// TODO: 20 dil var. Türkçe aralarında yok. O yüzden kullanılamadı.
-// content.js den mesaj ge?iyoruz: chrome.runtime.sendMessage({toSay: "hello sinan"}, function() {});
-// background.js de kullan?yoruz: chrome.tts.speak(message.toSay, { rate: 0.8, onEvent: function(event) {}}, function() {});

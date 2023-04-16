@@ -101,6 +101,34 @@ var audioList = [
     {
         value: "T028",
         key: "Yorum sekmesinden düşüncelerini paylaşabilirsin."
+    },
+    {
+        value: "T029",
+        key: "İlk sesi duyduğunda öğrencinin okul numarasını, ikinci sesi duyduğunda notunu okumalısın."
+    },
+    {
+        value: "T030",
+        key: "Örneğin."
+    },
+    {
+        value: "T031",
+        key: "No: 42"
+    },
+    {
+        value: "T032",
+        key: "Not: 100"
+    },
+    {
+        value: "T033",
+        key: "Not girişi tamamlandığında bana 'tamam' diye seslenerek işlemi bitirebilir, 'oku' diye seslenerek giriş yaptığım notları kontrol edebilirsin."
+    },
+    {
+        value: "T034",
+        key: "Yanlışmı anladım acaba. Öğrencinin notunu tekrar söylermisin?"
+    },
+    {
+        value: "T035",
+        key: "Önce öğrencinin numarasını söylemelisin."
     }
 ];
 
@@ -121,8 +149,8 @@ window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecogn
 var recognition = new window.SpeechRecognition();
 
 recognition.lang = 'tr-TR';
-recognition.maxAlternatives = 1;
-recognition.interimResults = false;
+recognition.maxAlternatives = 2;
+recognition.interimResults = true;
 recognition.continuous = false;
 
 //endregion
@@ -131,11 +159,13 @@ recognition.continuous = false;
 
 function speech(audioList, options) {
 
-    options = options || {};
-
     var resolve, reject;
 
-    // TODO: Daha sağlıklı kontrol olursa ekleyebiliriz.
+    options = options || {};
+
+    options.endCallbackTimeout = options.endCallbackTimeout || 0;
+
+    // FIXME: Daha sağlıklı kontrol olursa ekleyebiliriz.
     // if (audio && audio.currentTime > 0 && !audio.ended) {
     //     setTimeout(function () {
     //         reject();
@@ -146,7 +176,9 @@ function speech(audioList, options) {
 
         if (audioList <= 0) {
 
-            resolve();
+            setTimeout(function () {
+                resolve();
+            }, options.endCallbackTimeout);
 
         } else {
             speak();
@@ -156,7 +188,7 @@ function speech(audioList, options) {
 
     function errorCallback() {
 
-        sendAbnormal(chrome, "text to speech", "SpeechError", audio.src, audio.src);
+        sendAbnormalSpeech("SpeechError", audio.src);
 
         audioList.unshift(getErrorAudioPath());
 
@@ -179,7 +211,7 @@ function speech(audioList, options) {
 
         } catch (err) {
 
-            sendAbnormal(chrome, "text to speech", "SpeechError", audio.src, audio.src);
+            sendAbnormalSpeech("SpeechError", audio.src);
 
             errorCallback();
 
@@ -233,6 +265,14 @@ function getTextAudioPath(text) {
         valueList[index] = chrome.runtime.getURL("aud/text/" + value + ".mp3");
     });
 
+    if (valueList.length <= 0) {
+
+        sendAbnormalSpeech("SpeechError", text);
+
+        valueList.push(chrome.runtime.getURL("aud/error.mp3"));
+    }
+
+
     return valueList;
 }
 
@@ -248,66 +288,73 @@ function getErrorAudioPath() {
 
 //region Function >> speechToText
 
+/*
+
+İhtiyaç olursa kullanılabilir.
+
+recognition.onstart = function (event) {
+    console.log("onstart")
+};
+
+recognition.onaudiostart = function (event) {
+    console.log("onaudiostart")
+};
+
+recognition.onsoundstart = function (event) {
+    console.log("onsoundstart")
+};
+
+recognition.onspeechstart = function (event) {
+    console.log("onspeechstart")
+};
+
+recognition.onspeechend = function (event) {
+    console.log("onspeechend")
+};
+
+recognition.onsoundend = function (event) {
+    console.log("onsoundend")
+};
+
+recognition.onaudioend = function (event) {
+    console.log("onaudioend")
+};
+
+recognition.onnomatch = function (event) {
+    console.log("onnomatch")
+};
+
+recognition.onresult = function (event) {
+    console.log("onresult")
+};
+
+recognition.onend = function (event) {
+    console.log("onend")
+};
+
+recognition.onerror = function(event) {
+    console.log("onerror")
+}
+
+*/
 function speechToText(options) {
 
     options = options || {};
 
     var resolve, reject;
-    var finalTranscript;
+    var finalTranscript, interimTranscript;
 
     var startFocusElement = options.startFocusElement || null;
     var startBlurElement = options.startBlurElement || null;
-    var startSpeechSound = options.startSpeechSound || startSpeech;
-
-    //region speechToText >> note
-
-    // İhtiyaç olursa kullanılabilir.
-
-    // recognition.onstart = function (event) {
-    //     console.log("onstart")
-    // };
-    //
-    // recognition.onaudiostart = function (event) {
-    //     console.log("onaudiostart")
-    // };
-    //
-    // recognition.onsoundstart = function (event) {
-    //     console.log("onsoundstart")
-    // };
-    //
-    // recognition.onspeechstart = function (event) {
-    //     console.log("onspeechstart")
-    // };
-    //
-    // recognition.onspeechend = function (event) {
-    //     console.log("onspeechend")
-    // };
-    //
-    // recognition.onsoundend = function (event) {
-    //     console.log("onsoundend")
-    // };
-    //
-    // recognition.onaudioend = function (event) {
-    //     console.log("onaudioend")
-    // };
-    //
-    // recognition.onnomatch = function (event) {
-    //     console.log("onnomatch")
-    // };
-    //
-    // recognition.onresult = function (event) {
-    //     console.log("onresult")
-    // };
-    //
-    // recognition.onend = function (event) {
-    //     console.log("onend")
-    // };
-
-    //endregion
+    var startSpeechSoundPlay = options.startSpeechSoundFunc || startSpeechPlay;
 
     recognition.onstart = function (event) {
 
-        startSpeechSound();
+        finalTranscript = '';
+        interimTranscript = '';
+
+        if (startSpeechSoundPlay)
+            startSpeechSoundPlay();
 
         if (startBlurElement)
             startBlurElement.blur();
@@ -319,17 +366,45 @@ function speechToText(options) {
 
     recognition.onresult = function (event) {
 
-        if (event && event.results && event.results.length > 0 && event.results[0].length > 0)
-            finalTranscript = event.results[0][0].transcript;
+        var isFinal;
+        var recognitionResult;
+        var recognitionResults, recognitionResultIndex;
 
+        if (event && event.results) {
+
+            recognitionResultIndex = event.resultIndex;
+            recognitionResults = event.results || [];
+
+            for (var index = recognitionResultIndex; index < recognitionResults.length; ++index) {
+
+                isFinal = recognitionResults[index].isFinal;
+                recognitionResult = getRecognitionResultFromAlternatives(recognitionResults[index]);
+
+                if (isFinal) {
+                    finalTranscript += recognitionResult.transcript;
+                    // console.log("%c  finalTranscript >" + " confidence : " + recognitionResult.confidence.toString().padEnd(20, ' ') + "  transcript : " + recognitionResult.transcript.trim() + "  number : " + recognitionResult.number.trim(), 'color: #000000; font-size:15px');
+                } else {
+                    interimTranscript += recognitionResult.transcript;
+                    // console.log("%cinterimTranscript >" + " confidence : " + recognitionResult.confidence.toString().padEnd(20, ' ') + "  transcript : " + recognitionResult.transcript.trim() + "  number : " + recognitionResult.number.trim(), 'color: #ababab; font-size:15px');
+                }
+            }
+
+            finalTranscript = finalTranscript.trim();
+        }
     };
 
     recognition.onend = function (event) {
 
         if (finalTranscript) {
+
             resolve(finalTranscript);
+
         } else {
-            reject();
+
+            startSpeechSoundPlay = null;
+
+            recognition.start();
+
         }
 
     };
@@ -342,73 +417,61 @@ function speechToText(options) {
     });
 }
 
+function getRecognitionResultFromAlternatives(recognitionResultAlternatives) {
+
+    var recognitionResult;
+    var firstAlternative, secondAlternative
+
+    recognitionResult = {
+        confidence: "",
+        transcript: "",
+        number: ""
+    }
+
+    if (recognitionResultAlternatives.length > 1) {
+
+        firstAlternative = {
+            confidence: recognitionResultAlternatives[0].confidence,
+            transcript: recognitionResultAlternatives[0].transcript,
+            number: recognitionResultAlternatives[0].transcript.getNumber()
+        }
+        secondAlternative = {
+            confidence: recognitionResultAlternatives[1].confidence,
+            transcript: recognitionResultAlternatives[1].transcript,
+            number: recognitionResultAlternatives[1].transcript.getNumber()
+        }
+
+        recognitionResult = secondAlternative.number.startsWith(firstAlternative.number) ? secondAlternative : null;
+
+        if (!recognitionResult)
+            recognitionResult = firstAlternative.number.startsWith(secondAlternative.number) ? firstAlternative : null;
+
+        if (!recognitionResult)
+            recognitionResult = secondAlternative.confidence > firstAlternative.confidence ? secondAlternative : firstAlternative;
+
+    } else if (recognitionResultAlternatives.length === 1) {
+
+        firstAlternative = {
+            confidence: recognitionResultAlternatives[0].confidence,
+            transcript: recognitionResultAlternatives[0].transcript,
+            number: recognitionResultAlternatives[0].transcript.getNumber()
+        }
+
+        recognitionResult = firstAlternative;
+
+    }
+
+    return recognitionResult;
+}
+
 //endregion
 
-// TODO: Responsivevoice.js engelledi. Bu sebeple kaldırıldı.
-// function textToSpeech(text, options) {
-//
-//     text = text || "";
-//     options = options || "";
-//
-//     //region textToSpeech >> note
-//
-//     // TODO: 20 dil var. Türkçe aralarında yok. O yüzden kullanılamadı. responsivevoice.js kullanıldı.
-//     // synthesis = window.webkitSpeechSynthesis || window.speechSynthesis;
-//     // console.log(synthesis.getVoices());
-//     // synthesis.speak(utterThis);
-//
-//     // TODO: responsiveVoice.js yoğun sitelerde kısıtlama yapabilir, ticari kullanımı da yasaktır.
-//
-//     //endregion
-//
-//     var resolve, reject;
-//
-//     if (responsiveVoice.isPlaying()) {
-//         setTimeout(function () {
-//             reject();
-//         })
-//     }
-//
-//     function startCallback() {
-//     }
-//
-//     function endCallback() {
-//         resolve();
-//     }
-//
-//     function speak() {
-//
-//         // pitch  : Ses tonu.
-//         // rate   : Ses hızı.
-//         // volume : Ses seviyesi.
-//         responsiveVoice.speak(
-//             text,
-//             "Turkish Male",
-//             {
-//                 pitch: options.pitch || 1,
-//                 rate: options.rate || 1.2,
-//                 volume: options.volume || 1,
-//                 onstart: startCallback,
-//                 onend: endCallback
-//             }
-//         );
-//
-//     }
-//
-//     if (options.call) {
-//
-//         options.call()
-//             .then(function () {
-//                 speak();
-//             })
-//
-//     } else {
-//         speak();
-//     }
-//
-//
-//     return new Promise(function (resolveFunc, rejectFunc) {
-//         resolve = resolveFunc;
-//         reject = rejectFunc;
-//     });
-// }
+//region Function >> sendAbnormalSpeech
+
+function sendAbnormalSpeech(category, text) {
+
+    gtag('event', category, {'text': text});
+
+}
+
+//endregion
