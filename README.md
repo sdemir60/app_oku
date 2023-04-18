@@ -1,28 +1,24 @@
-  ## OKU | Chrome Eklentisi
+  ## OKU | Google Chrome Eklentisi
 
-"OKU" chrome eklentisi: e-Okul sistemine sesli olarak hızlı ve pratik bir şekilde not girişi sağlar. Sınav dönemlerinde öğretmenlerimizin en büyük yardımcısı olur.
+"OKU" google chrome eklentisi: Öğretmenlerimizin kimseye ihtiyaç duymadan, herhangi bir not çizelgesi hazırlamadan, doğrudan sınav kağıtları üzerinden hızlı ve pratik bir şekilde e-Okul sistemine sesli not girişlerini sağlar. Sınav dönemlerinde onların en büyük yardımcısı olur.
 
-Kimseye ihtiyaç duymadan, not çizelgeleri hazırlamadan, sınav kağıtlarını sıralamadan rahat bir şekilde sesli not girişine ve kontrolüne imkan sağlar.
+Ayrıca "OKU" eklentisi ile sınıf listeleri excel olarak indirilebilir, not girişleri tamamlandıktan sonra e-Okul sistemine toplu olarak yüklenebilir.
 
-Ayrıca "OKU" eklentisi ile sınıf listeleri excel olarak indirilebilir; not girişleri tamamlandıktan sonra excel geri yüklenerek toplu not girişi de yapılabilir.
-
-Uygulama bilgisayarda chrome tarayıcısında çalışır.
+Uygulama bilgisayarda google chrome web tarayıcısında çalışır, chrome web mağazasından kurulumu yapılır.
 
 <br>
   
   ### Kurulum
-- https://chrome.google.com/webstore/detail/oku/dkbhkkfomkgjdhfoockmplhmlhkckhoh
-- Eklentiye linkten, "OKU" ismiyle chrome web mağazasından veya "OKU eklentisi" şeklinde arama motlarlarından erişilebilir.
-- "OKU" eklentisi chrome mağazasında açıldıktan sonra "Chrome'a Ekle" tıklanıp aktif hale getirilmelidir.
+- Linkten (https://chrome.google.com/webstore/detail/oku/dkbhkkfomkgjdhfoockmplhmlhkckhoh) eklenti sayfasına erişim sağlanır.
+- "Chrome'a Ekle" tıklanıp kurulum sağlanır.
 
 <br>
 
   ### Sesli Not Girişi
 - Not giriş ekranında sınıf, şube, ders ve not giriş alanları seçildikten sonra sınıf listelenir.
 - "OKU" butonu veya "Alt + O" kısayol tuşları ile sesli not girişi başlatılır.
-- Sesli not girişi başladıktan sonra uygulama öğretmeni yönlendirir. Sesler dikkatli takip edilmelidir. İlk ses duyduğunda öğrencinin okul numarası, ikinci sesi duyduğunda öğrencinin notu söylenmelidir.
-- Not girişi tamamlandıktan sonra "tamam" diye seslenerek işlem bitirilebilir.
-- Not girişi tamamlandıktan sonra "oku" diye seslenerek not giriş sırasına göre uygulamanın notları okuması istenebilir ve gerekli kontroller sağlanabilir.
+- Sesli not girişi başladıktan sonra uygulama öğretmeni yönlendirir. Sesler dikkatli takip edilmelidir. İlk ses duyduğunda "no 42" şeklinde öğrencinin okul numarası, ikinci ses duyduğunda "not 100" şeklinde öğrencinin notu söylenmelidir. Veya ilk ses duyulduğunda "no 42 not 100" şeklinde bütün olarak da söylenebilir.
+- Not girişi tamamlandıktan sonra "tamam" diye seslenerek işlem bitirilebilir veya "oku" diye seslenerek not giriş sırasına göre uygulamanın notları okuması istenebilir ve gerekli kontroller sağlanabilir.
 
 <br>
 
