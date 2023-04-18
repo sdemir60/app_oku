@@ -42,12 +42,14 @@ function createNotification() {
 
                 chrome.notifications.onClicked.addListener(
                     function () {
-                        chrome.tabs.sendMessage(tabs[0].id, {
-                            command: "analytics",
-                            category: "Notification",
-                            transaction: "notification clicked"
+                        chrome.tabs.query({active: true, lastFocusedWindow: true}, function (tabs) {
+                            chrome.tabs.sendMessage(tabs[0].id, {
+                                command: "analytics",
+                                category: "Notification",
+                                transaction: "notification clicked"
+                            });
                         });
-                        chrome.tabs.create({url: 'https://www.youtube.com/watch?v=r_Ex-PKJ-P4&feature=emb_title'});
+                        chrome.tabs.create({url: 'https://www.youtube.com/watch?v=AJRS5Yk6MyI&t=1s'});
                     }
                 )
 
@@ -91,7 +93,7 @@ chrome.commands.onCommand.addListener(function (command) {
                     category: "TutorialCommand",
                     transaction: "tutorial command"
                 });
-                chrome.tabs.create({url: "https://youtu.be/Er3Ha68K8nQ"});
+                chrome.tabs.create({url: "https://www.youtube.com/watch?v=AJRS5Yk6MyI&t=1s"});
             });
             break;
         case "yardim":

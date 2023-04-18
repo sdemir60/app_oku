@@ -22,7 +22,7 @@ $(document).ready(function () {
                     category: "HelpTutorialLink",
                     transaction: "tutorial link clicked"
                 });
-                chrome.tabs.create({url: "https://youtu.be/4IS2iUA3eAM"});
+                chrome.tabs.create({url: "https://www.youtube.com/watch?v=AJRS5Yk6MyI&t=1s"});
             });
         });
 

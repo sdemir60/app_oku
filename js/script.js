@@ -86,7 +86,7 @@ function createShareButton() {
         table.parentElement.insertBefore(container, table.nextSibling);
 
         btnFacebook.setAttribute('id', "SocialShareBtnFacebook");
-        btnFacebook.setAttribute('href', "https://www.facebook.com/sharer/sharer.php?u=https://www.facebook.com/sindem60/posts/10221160274499930");
+        btnFacebook.setAttribute('href', "");
         btnFacebook.setAttribute('target', "_blank");
         btnFacebook.setAttribute('class', "social-share-btn social-share-btn-f");
         btnFacebookI.setAttribute('class', "fab fa-facebook");
@@ -95,7 +95,7 @@ function createShareButton() {
         btnFacebook.appendChild(btnFacebookSpan);
 
         btnTwitter.setAttribute('id', "SocialShareBtnTwitter");
-        btnTwitter.setAttribute('href', "https://twitter.com/intent/retweet?tweet_id=1214257573081341953");
+        btnTwitter.setAttribute('href', "");
         btnTwitter.setAttribute('target', "_blank");
         btnTwitter.setAttribute('class', "social-share-btn social-share-btn-t");
         btnTwitterI.setAttribute('class', "fab fa-twitter");
@@ -104,7 +104,7 @@ function createShareButton() {
         btnTwitter.appendChild(btnTwitterSpan);
 
         btnYoutube.setAttribute('id', "SocialShareBtnYoutube");
-        btnYoutube.setAttribute('href', "https://www.youtube.com/watch?v=r_Ex-PKJ-P4&feature=emb_title");
+        btnYoutube.setAttribute('href', "https://www.youtube.com/watch?v=AJRS5Yk6MyI&t=1s");
         btnYoutube.setAttribute('target', "_blank");
         btnYoutube.setAttribute('class', "social-share-btn social-share-btn-y");
         btnYoutubeI.setAttribute('class', "fab fa-youtube");
@@ -113,7 +113,7 @@ function createShareButton() {
         btnYoutube.appendChild(btnYoutubeSpan);
 
         btnLinkedin.setAttribute('id', "SocialShareBtnLinkedin");
-        btnLinkedin.setAttribute('href', "https://www.linkedin.com/shareArticle?url=https://www.linkedin.com/posts/sdemir60_oku-activity-6620024154508808192-LKGj");
+        btnLinkedin.setAttribute('href', "https://www.linkedin.com/posts/sdemir60_github-sdemir60appoku-activity-7054127420425027584-7wkb?utm_source=share&utm_medium=member_desktop");
         btnLinkedin.setAttribute('target', "_blank");
         btnLinkedin.setAttribute('class', "social-share-btn social-share-btn-l");
         btnLinkedinI.setAttribute('class', "fab fa-linkedin");
@@ -130,11 +130,11 @@ function createShareButton() {
         btnGoogle.appendChild(btnGoogleI);
         btnGoogle.appendChild(btnGoogleSpan);
 
-        container.appendChild(btnGoogle);
         container.appendChild(btnYoutube);
-        container.appendChild(btnTwitter);
-        container.appendChild(btnFacebook);
+        // container.appendChild(btnTwitter);
+        // container.appendChild(btnFacebook);
         container.appendChild(btnLinkedin);
+        container.appendChild(btnGoogle);
 
         table.classList.add("added-share-buttons");
     }
@@ -268,7 +268,7 @@ function writeTable(sinif) {
 
                             if (inputType === "text" && !inputDisable) {
 
-                                if (not && not.length > 0 && ogrenci[not] && parseFloat(ogrenci[not]) >= 0 && parseFloat(ogrenci[not]) <= 100) {
+                                if (not && not.length > 0 && ogrenci && ogrenci[not] && parseFloat(ogrenci[not]) >= 0 && parseFloat(ogrenci[not]) <= 100) {
                                     input.val(ogrenci[not]);
                                     addFilledCss(input);
                                 } else {
