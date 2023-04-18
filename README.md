@@ -9,7 +9,8 @@ Uygulama bilgisayarda google chrome web tarayıcısında çalışır, chrome web
 <br>
   
   ### Kurulum
-- Linkten (https://chrome.google.com/webstore/detail/oku/dkbhkkfomkgjdhfoockmplhmlhkckhoh) eklenti sayfasına erişim sağlanır.
+- [Linkten](https://chrome.google.com/webstore/detail/oku/dkbhkkfomkgjdhfoockmplhmlhkckhoh) eklenti sayfasına erişim sağlanır.
+<br>https://chrome.google.com/webstore/detail/oku/dkbhkkfomkgjdhfoockmplhmlhkckhoh
 - "Chrome'a Ekle" tıklanıp kurulum sağlanır.
 
 <br>
