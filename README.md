@@ -1,6 +1,6 @@
   ## OKU | Google Chrome Eklentisi
 
-"OKU" google chrome eklentisi: Öğretmenlerimizin kimseye ihtiyaç duymadan, herhangi bir not çizelgesi hazırlamadan, doğrudan sınav kağıtları üzerinden hızlı ve pratik bir şekilde e-Okul sistemine sesli not girişlerini sağlar. Sınav dönemlerinde onların en büyük yardımcısı olur.
+"OKU" google chrome eklentisi: Öğretmenlerimizin kimseye ihtiyaç duymadan, herhangi bir not çizelgesi hazırlamadan, doğrudan sınav kağıtları üzerinden hızlı ve pratik bir şekilde e-Okul sistemine sesli not girişi yapabilmelerini sağlar. Sınav dönemlerinde onların en büyük yardımcısı olur.
 
 Ayrıca "OKU" eklentisi ile sınıf listeleri excel olarak indirilebilir, not girişleri tamamlandıktan sonra e-Okul sistemine toplu olarak yüklenebilir.
 
