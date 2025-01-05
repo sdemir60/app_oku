@@ -828,7 +828,7 @@ function check(request) {
 
         } else {
 
-            focus(notAlani.inp[index].el);
+            focus(notAlani.inp[index]);
 
             writeTextPlay()
                 .then(function () {

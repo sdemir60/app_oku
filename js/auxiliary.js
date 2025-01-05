@@ -11,7 +11,7 @@ function focus(event) {
 
     } else if (event) {
 
-        $input = event;
+        $input = $(event);
 
         $input.closest('table').find('.tr-focused').removeClass('tr-focused');
         $input.closest('tr').addClass('tr-focused');
