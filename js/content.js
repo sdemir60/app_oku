@@ -484,7 +484,7 @@ function download(request, sendResponse) {
                 baslikAdet = 0;
 
                 $(this)
-                    .find("td")
+                    .find("> td")
                     .each(function (kolon) {
 
                         var text = $(this).text().trim();
@@ -502,7 +502,7 @@ function download(request, sendResponse) {
             } else {
 
                 $(this)
-                    .find("td")
+                    .find("> td")
                     .each(function (kolon) {
 
                         var text = $(this).text().trim();
