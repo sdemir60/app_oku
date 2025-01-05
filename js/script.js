@@ -256,7 +256,7 @@ function writeTable(sinif) {
                     if (!okulNo || (okulNo && okulNo.length <= 0)) return;
 
                     $(this)
-                        .find("td")
+                        .find("> td")
                         .each(function (kolon) {
 
                             if (kolon === 0 || kolon === 1) return;
