@@ -2,7 +2,7 @@ function hideSensitiveData() {
 
     var indexesToSkip = [2, 5, 6, 9, 12, 20, 24, 30, 33];
 
-    document.querySelectorAll("#dgListem tbody tr td:nth-child(1)")
+    document.querySelectorAll("#dgListem > tbody > tr td:nth-child(1)")
         .forEach(function (td, index) {
 
             if (index > 0 && !indexesToSkip.includes(index)) {
@@ -11,7 +11,7 @@ function hideSensitiveData() {
 
         });
 
-    document.querySelectorAll("#dgListem tbody tr td:nth-child(2)")
+    document.querySelectorAll("#dgListem > tbody > tr td:nth-child(2)")
         .forEach(function (td, index) {
 
             if (index > 0) {

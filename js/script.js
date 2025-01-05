@@ -17,9 +17,18 @@ String.prototype.trToLowerCase = function () {
 
 //region Script >> Add
 
+function addEvents() {
+
+    $("#dgListem > tbody > tr > td input")
+        .each(function (index, input) {
+            $(input).on('focus', focus);
+            $(input).on('blur', blur);
+        });
+}
+
 function addCss() {
 
-    $("#dgListem tbody tr")
+    $("#dgListem > tbody > tr")
         .each(function (satir) {
             $(this)
                 .find("td")
@@ -222,7 +231,7 @@ function writeTable(sinif) {
         setTimeout(function () {
 
             var tBasliklar = {"0": "okulno", "1": "adısoyadı"};
-            $("#dgListem tbody tr:first-child td")
+            $("#dgListem > tbody > tr:first-child td")
                 .each(function (baslikKolon) {
 
                     if (baslikKolon >= 2) {
@@ -237,7 +246,7 @@ function writeTable(sinif) {
 
                 });
 
-            $("#dgListem tbody tr")
+            $("#dgListem > tbody > tr")
                 .each(function (satir) {
 
                     if (satir === 0) return;
@@ -302,6 +311,7 @@ function writeTable(sinif) {
 
 //region Script >> Call Function
 
+addEvents();
 addCss();
 createInput();
 createShareButton();

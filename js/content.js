@@ -93,23 +93,21 @@ function read(request) {
             if (notGirisAlani.idx > 0) {
 
                 notAlani.el
-                    .find("tbody tr td:first-child")
+                    .find("> tbody > tr > td:first-child")
                     .each(function (index, td) {
 
-                        var inputEl = notAlani.el.find("tbody tr:nth-child(" + (index + 1) + ") td:nth-child(" + notGirisAlani.idx + ") input");
+                        var inputEl = notAlani.el.find("> tbody > tr:nth-child(" + (index + 1) + ") > td:nth-child(" + notGirisAlani.idx + ") input");
                         var isDisabled = inputEl.prop('disabled');
 
                         if (isDisabled) {
-
                             inputEl.prop('disabled', false);
                             inputEl.prop('readonly', true);
-
                         }
 
                         if (index > 0) {
                             notAlani.dic[td.innerText] = {
                                 isDis: isDisabled,
-                                el: notAlani.el.find("tbody tr:nth-child(" + (index + 1) + ") td:nth-child(" + notGirisAlani.idx + ") input")
+                                el: notAlani.el.find("> tbody > tr:nth-child(" + (index + 1) + ") > td:nth-child(" + notGirisAlani.idx + ") input")
                             }
                         }
 
@@ -476,7 +474,7 @@ function download(request, sendResponse) {
 
     //region Excel >> Create Object
 
-    $("#dgListem tbody tr")
+    $("#dgListem > tbody > tr")
         .each(function (satir) {
 
             var ogrenci = {};
@@ -732,14 +730,14 @@ function check(request) {
                 if (notGirisAlani.idx > 0) {
 
                     notAlani.el
-                        .find("tbody tr td:first-child")
+                        .find("> tbody > tr > td:first-child")
                         .each(function (index, td) {
                             if (index > 0)
                                 notAlani.txt.push(td.innerText);
                         });
 
                     notAlani.el
-                        .find("tbody tr td:nth-child(" + (notGirisAlani.idx) + ") input")
+                        .find("> tbody > tr > td:nth-child(" + (notGirisAlani.idx) + ") input")
                         .each(function (index, input) {
 
                             var isDisabled = $(input).prop('disabled');
@@ -830,7 +828,7 @@ function check(request) {
 
         } else {
 
-            focus(notAlani.inp[index]);
+            focus(notAlani.inp[index].el);
 
             writeTextPlay()
                 .then(function () {

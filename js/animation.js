@@ -28,7 +28,7 @@ function removeInputCss(input) {
 
 function clearInputCss() {
 
-    var inputs = $("#dgListem tbody tr input");
+    var inputs = $("#dgListem > tbody > tr input");
 
     inputs.css("background", "");
     inputs.css("border-color", "");
@@ -41,7 +41,7 @@ function blinkerAnimate(tdIndex) {
     var columns;
     var resolve, reject;
 
-    columns = $("#dgListem tbody tr td:nth-child(" + tdIndex + ")");
+    columns = $("#dgListem > tbody > tr td:nth-child(" + tdIndex + ")");
 
     columns.addClass("blinker");
 

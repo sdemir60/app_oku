@@ -1,3 +1,27 @@
+#dgListem > tbody > tr:not(.tr-focused),
+#dgListem > tbody > tr:not(.tr-focused) > td:not(.frmListBaslik),
+#dgListem > tbody > tr:not(.tr-focused) > td:not(.frmListBaslik) table tbody tr,
+#dgListem > tbody > tr:not(.tr-focused) > td:not(.frmListBaslik) table tbody tr td {
+    color: black !important;
+    background-color: white !important;
+}
+
+#dgListem > tbody > tr:not(.tr-focused):hover,
+#dgListem > tbody > tr:not(.tr-focused):hover > td:not(.frmListBaslik),
+#dgListem > tbody > tr:not(.tr-focused):hover > td:not(.frmListBaslik) table tbody tr,
+#dgListem > tbody > tr:not(.tr-focused):hover > td:not(.frmListBaslik) table tbody tr td {
+    color: black !important;
+    background-color: #f5f5f5 !important;
+}
+
+#dgListem > tbody > tr.tr-focused,
+#dgListem > tbody > tr.tr-focused > td,
+#dgListem > tbody > tr.tr-focused > td table tbody tr,
+#dgListem > tbody > tr.tr-focused > td table tbody tr td {
+    color: black !important;
+    background-color: #ebebeb !important;
+}
+
 input.oku-input-grade {
     outline: none !important;
 }
