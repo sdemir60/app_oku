@@ -8,7 +8,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
             if (request.command === "analytics") {
 
-                gtag('event', request.category, {'event': request.transaction});
+                // gtag('event', request.category, {'event': request.transaction});
 
             } else if (request.command === "oku") {
 
@@ -408,8 +408,8 @@ function read(request) {
 
     function checkNotes() {
 
-        gtag('event', "ReadEnd", {'event': "read end"});
-        gtag('event', "CheckStart", {'event': "check start"});
+        // gtag('event', "ReadEnd", {'event': "read end"});
+        // gtag('event', "CheckStart", {'event': "check start"});
 
         request.notGirisAlaniKontrol = notGirisAlaniKontrol;
         request.notAlaniKontrol = notAlaniKontrol;
@@ -420,7 +420,7 @@ function read(request) {
 
     function complete() {
 
-        gtag('event', "ReadEnd", {'event': "read end"});
+        // gtag('event', "ReadEnd", {'event': "read end"});
 
         focus(guvenlikKodu.el);
 
@@ -813,7 +813,7 @@ function check(request) {
 
         if (index === notAlani.inp.length) {
 
-            gtag('event', "CheckEnd", {'event': "check end"});
+            // gtag('event', "CheckEnd", {'event': "check end"});
 
             focus(guvenlikKodu.el);
 
@@ -886,7 +886,7 @@ function check(request) {
 
             SocialShareBtnFacebook.addEventListener("click", function () {
 
-                gtag('event', "ShareOnFacebook", {'event': "share on facebook"});
+                // gtag('event', "ShareOnFacebook", {'event': "share on facebook"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -897,7 +897,7 @@ function check(request) {
 
             SocialShareBtnTwitter.addEventListener("click", function () {
 
-                gtag('event', "ShareOnTwitter", {'event': "share on twitter"});
+                // gtag('event', "ShareOnTwitter", {'event': "share on twitter"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -908,7 +908,7 @@ function check(request) {
 
             SocialShareBtnYoutube.addEventListener("click", function () {
 
-                gtag('event', "ShareOnYoutube", {'event': "share on youtube"});
+                // gtag('event', "ShareOnYoutube", {'event': "share on youtube"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -919,7 +919,7 @@ function check(request) {
 
             SocialShareBtnLinkedin.addEventListener("click", function () {
 
-                gtag('event', "ShareOnLinkedin", {'event': "share on linkedin"});
+                // gtag('event', "ShareOnLinkedin", {'event': "share on linkedin"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {
@@ -930,7 +930,7 @@ function check(request) {
 
             SocialShareBtnGoogle.addEventListener("click", function () {
 
-                gtag('event', "ShareOnGoogleStore", {'event': "share on google store"});
+                // gtag('event', "ShareOnGoogleStore", {'event': "share on google store"});
 
                 textToSpeech("Teşekkür ederim.")
                     .then(function () {

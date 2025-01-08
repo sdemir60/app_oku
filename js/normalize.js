@@ -151,7 +151,7 @@ function sendAbnormalNumber(category, abnormalText, abnormalNum) {
 
     if (abnormalText || abnormalNum) {
 
-        gtag('event', category, {'text': abnormalText, 'number': abnormalNum});
+        // gtag('event', category, {'text': abnormalText, 'number': abnormalNum});
 
     }
 

@@ -127,8 +127,8 @@ function stopOnlick(event) {
 
 function debugviewOnlick(event) {
 
-    gtag('event', 'fonksiyonAdı1');
-    gtag('event', 'fonksiyonAdı2', {'etiketAdı': 'etiketDeğeri'});
+    // gtag('event', 'fonksiyonAdı1');
+    // gtag('event', 'fonksiyonAdı2', {'etiketAdı': 'etiketDeğeri'});
 
 }
 

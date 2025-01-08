@@ -470,7 +470,7 @@ function getRecognitionResultFromAlternatives(recognitionResultAlternatives) {
 
 function sendAbnormalSpeech(category, text) {
 
-    gtag('event', category, {'text': text});
+    // gtag('event', category, {'text': text});
 
 }
 
